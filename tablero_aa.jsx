@@ -32,6 +32,7 @@ const DEFAULTS = {
   pax2026:  [4553378,4019397,4264675,3642907,3338468,3513084,4344125,4225813,3953184,3979287,3951415,4473847],
   meta1Final: 0.38,             // se evalúa con el dato de diciembre 2026
   base2025AdqTotal: 0.036073,   // tasa total adquisición/pasajeros 2025
+  fechaCorte: null,             // texto libre, ej: "12/06/2026" — opcional, para datos a mitad de mes
 };
 
 // Planilla de Google Sheets publicada como CSV — fuente de datos en vivo.
@@ -47,7 +48,9 @@ function parseNum(s){
 
 // La planilla debe tener una fila por mes (Ene..Dic) con columnas:
 // Mes, OBJ1_Forecast, OBJ1_Real, OBJ2_Base2025, OBJ2_Real2026, Conversaciones2026, Pasajeros2026
-// y dos filas extra con constantes anuales: "Meta1Final" y "Base2025AdqTotal" (columna B = valor).
+// y filas extra con constantes: "Meta1Final", "Base2025AdqTotal" y "FechaCorte" (columna B = valor).
+// FechaCorte es texto libre (ej: "12/06/2026") y se muestra en el header en lugar del mes cerrado;
+// útil cuando se cargan datos a una fecha intermedia del mes en curso.
 function parseSheet(csvText){
   const rows = csvText.trim().split(/\r?\n/).map(l => l.split(",").map(c => c.trim().replace(/^"|"$/g,"")));
   const d = {
@@ -59,6 +62,7 @@ function parseSheet(csvText){
     pax2026: [...DEFAULTS.pax2026],
     meta1Final: DEFAULTS.meta1Final,
     base2025AdqTotal: DEFAULTS.base2025AdqTotal,
+    fechaCorte: DEFAULTS.fechaCorte,
   };
   for(const row of rows){
     const key = row[0];
@@ -74,6 +78,8 @@ function parseSheet(csvText){
       const v=parseNum(row[1]); if(v!=null) d.meta1Final=v;
     } else if(key==="Base2025AdqTotal"){
       const v=parseNum(row[1]); if(v!=null) d.base2025AdqTotal=v;
+    } else if(key==="FechaCorte"){
+      d.fechaCorte = row[1] && row[1]!=="" ? row[1] : null;
     }
   }
   return d;
@@ -105,7 +111,7 @@ function Pill({ ratio, text }){
       color: isDark ? AA.grisOscuro : "#fff",
       borderRadius: 4,
       padding: "3px 10px",
-      fontSize: 10,
+      fontSize: 12,
       fontWeight: 700,
       letterSpacing: 0.5,
       textTransform: "uppercase",
@@ -125,7 +131,7 @@ function MiniChart({ real, forecast, meta, title }){
   const path=arr=>{const pts=arr.map((v,i)=>v!=null?`${xp(i)},${yp(v)}`:null).filter(Boolean);return pts.length?"M"+pts.join("L"):"";};
   return (
     <div>
-      <div style={{fontSize:11,fontWeight:700,color:AA.gris,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>{title}</div>
+      <div style={{fontSize:13,fontWeight:700,color:AA.gris,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>{title}</div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{display:"block"}}>
         {[0,.5,1].map(t=><line key={t} x1={pL} x2={W-pR} y1={pT+iH*(1-t)} y2={pT+iH*(1-t)} stroke="#dde3e3" strokeWidth="1"/>)}
         {meta&&<path d={path(meta)} fill="none" stroke={AA.limon} strokeWidth="1.5" strokeDasharray="5,3"/>}
@@ -134,7 +140,7 @@ function MiniChart({ real, forecast, meta, title }){
         {real.map((v,i)=>v!=null&&<circle key={i} cx={xp(i)} cy={yp(v)} r="3.5" fill={statusColor(v/(meta?meta[i]:forecast[i]))} stroke="#fff" strokeWidth="1"/>)}
         {MESES.map((m,i)=><text key={i} x={xp(i)} y={H-6} textAnchor="middle" fontSize="9" fill={AA.grisClaro}>{m}</text>)}
       </svg>
-      <div style={{display:"flex",gap:14,marginTop:6,fontSize:10,color:AA.grisClaro}}>
+      <div style={{display:"flex",gap:14,marginTop:6,fontSize:12,color:AA.grisClaro}}>
         <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{display:"inline-block",width:16,height:2.5,background:AA.verde}}/> Real</span>
         {meta&&<span style={{display:"flex",alignItems:"center",gap:4}}><span style={{display:"inline-block",width:16,height:2,borderTop:`2px dashed ${AA.limon}`}}/> Meta</span>}
         <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{display:"inline-block",width:16,height:2,borderTop:`2px dashed ${AA.tealClaro}`}}/> Forecast</span>
@@ -143,9 +149,9 @@ function MiniChart({ real, forecast, meta, title }){
   );
 }
 
-const tS={width:"100%",borderCollapse:"collapse",fontSize:12,fontFamily:"'Open Sans','Verdana',sans-serif"};
+const tS={width:"100%",borderCollapse:"collapse",fontSize:14,fontFamily:"'Open Sans','Verdana',sans-serif"};
 const thR={background:AA.verde,color:"#fff"};
-const th={padding:"10px 14px",textAlign:"left",fontWeight:700,fontSize:11,letterSpacing:0.8,textTransform:"uppercase"};
+const th={padding:"10px 14px",textAlign:"left",fontWeight:700,fontSize:13,letterSpacing:0.8,textTransform:"uppercase"};
 const td={padding:"9px 14px",borderBottom:`1px solid #e2e8e8`};
 
 function ObjPanel({ obj, chart, table }){
@@ -154,25 +160,25 @@ function ObjPanel({ obj, chart, table }){
       <div style={{display:"flex",flexDirection:"column",gap:14}}>
         {/* Info card */}
         <div style={{background:AA.blanco,borderRadius:10,padding:"22px 24px",boxShadow:"0 1px 6px rgba(0,115,129,0.10)",border:`1px solid #e2e8e8`}}>
-          <span style={{fontSize:10,color:AA.grisClaro,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{obj.cod}</span>
-          <div style={{fontSize:16,fontWeight:700,color:AA.texto,margin:"8px 0 10px",lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.titulo}</div>
-          <div style={{fontSize:12,color:AA.gris,lineHeight:1.7,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{obj.detalle}</div>
+          <span style={{fontSize:12,color:AA.grisClaro,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{obj.cod}</span>
+          <div style={{fontSize:18,fontWeight:700,color:AA.texto,margin:"8px 0 10px",lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.titulo}</div>
+          <div style={{fontSize:14,color:AA.gris,lineHeight:1.7,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{obj.detalle}</div>
 
           {obj.kind === "binary" ? (
             <div style={{display:"flex",gap:10,marginTop:14}}>
               <div style={{flex:1,background:AA.grisBg,borderRadius:8,padding:"12px 14px"}}>
-                <div style={{fontSize:10,color:AA.gris,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Real más reciente</div>
-                <div style={{fontSize:20,fontWeight:700,color:statusColor(obj.ratio),fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.realLabel}</div>
+                <div style={{fontSize:12,color:AA.gris,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Real más reciente</div>
+                <div style={{fontSize:22,fontWeight:700,color:statusColor(obj.ratio),fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.realLabel}</div>
               </div>
               <div style={{flex:1,background:AA.limonClaro,borderRadius:8,padding:"12px 14px"}}>
-                <div style={{fontSize:10,color:AA.grisOscuro,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final (diciembre)</div>
-                <div style={{fontSize:20,fontWeight:700,color:AA.grisOscuro,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.metaLabel}</div>
+                <div style={{fontSize:12,color:AA.grisOscuro,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final (diciembre)</div>
+                <div style={{fontSize:22,fontWeight:700,color:AA.grisOscuro,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.metaLabel}</div>
               </div>
             </div>
           ) : (
             <>
               <Bar ratio={obj.ratio}/>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:AA.grisClaro,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:AA.grisClaro,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
                 <span>0%</span>
                 <span style={{fontWeight:700,color:statusColor(obj.ratio)}}>{pctN(obj.ratio,1)}% de avance hacia la meta anual</span>
                 <span>100%</span>
@@ -185,8 +191,8 @@ function ObjPanel({ obj, chart, table }){
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,textAlign:"center"}}>
             {obj.kpis.map((k,i)=>(
               <div key={i} style={{padding:"12px 6px",borderRadius:8,background:AA.grisBg}}>
-                <div style={{fontSize:22,fontWeight:700,color:k.color,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{k.value}</div>
-                <div style={{fontSize:10,fontWeight:600,color:AA.gris,marginTop:4,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{k.label}</div>
+                <div style={{fontSize:24,fontWeight:700,color:k.color,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{k.value}</div>
+                <div style={{fontSize:12,fontWeight:600,color:AA.gris,marginTop:4,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{k.label}</div>
               </div>
             ))}
           </div>
@@ -198,7 +204,7 @@ function ObjPanel({ obj, chart, table }){
       </div>
       {/* Table */}
       <div style={{background:AA.blanco,borderRadius:10,boxShadow:"0 1px 6px rgba(0,115,129,0.10)",overflow:"hidden",border:`1px solid #e2e8e8`}}>
-        <div style={{padding:"14px 18px",borderBottom:`1px solid #e2e8e8`,fontWeight:700,fontSize:12,color:AA.verde,textTransform:"uppercase",letterSpacing:1,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Detalle mensual</div>
+        <div style={{padding:"14px 18px",borderBottom:`1px solid #e2e8e8`,fontWeight:700,fontSize:14,color:AA.verde,textTransform:"uppercase",letterSpacing:1,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Detalle mensual</div>
         <div style={{overflow:"auto",maxHeight:460}}>{table}</div>
       </div>
     </div>
@@ -313,22 +319,22 @@ export default function App(){
               <polygon points="22,24 36,30 22,36" fill={AA.grisOscuro} opacity="0.4"/>
             </svg>
             <div>
-              <div style={{fontSize:10,opacity:0.75,letterSpacing:3,textTransform:"uppercase",fontFamily:"'Open Sans','Verdana',sans-serif"}}>Aeropuertos Argentina</div>
-              <div style={{fontSize:22,fontWeight:700,letterSpacing:-0.3,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>Tablero de Objetivos 2026</div>
+              <div style={{fontSize:12,opacity:0.75,letterSpacing:3,textTransform:"uppercase",fontFamily:"'Open Sans','Verdana',sans-serif"}}>Aeropuertos Argentina</div>
+              <div style={{fontSize:24,fontWeight:700,letterSpacing:-0.3,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>Tablero de Objetivos 2026</div>
             </div>
           </div>
-          <div style={{textAlign:"right",fontSize:11,opacity:0.8,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
-            <div>{lastR2>=0 ? `Datos hasta ${MESES[lastR2]} 2026` : "Sin datos cargados"}</div>
+          <div style={{textAlign:"right",fontSize:13,opacity:0.8,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
+            <div>{data.fechaCorte ? `Datos al ${data.fechaCorte}` : (lastR2>=0 ? `Datos hasta ${MESES[lastR2]} 2026` : "Sin datos cargados")}</div>
             <div style={{marginTop:5,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:"4px 16px",display:"inline-block",fontWeight:600,letterSpacing:0.5}}>{lastR2+1} / 12 meses</div>
             <div style={{marginTop:8,display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end"}}>
               <button onClick={loadData} disabled={loading} style={{
                 background:"rgba(255,255,255,0.18)", color:"#fff", border:"1px solid rgba(255,255,255,0.4)",
-                borderRadius:16, padding:"4px 14px", fontSize:11, fontWeight:600, cursor:loading?"default":"pointer",
+                borderRadius:16, padding:"4px 14px", fontSize:13, fontWeight:600, cursor:loading?"default":"pointer",
                 fontFamily:"'Open Sans','Verdana',sans-serif",
               }}>{loading ? "Actualizando..." : "Actualizar datos"}</button>
             </div>
-            {updatedAt && <div style={{marginTop:4,fontSize:10,opacity:0.7}}>Última actualización: {updatedAt.toLocaleTimeString("es-AR")}</div>}
-            {loadError && <div style={{marginTop:4,fontSize:10,color:AA.limon,maxWidth:260}}>{loadError}</div>}
+            {updatedAt && <div style={{marginTop:4,fontSize:12,opacity:0.7}}>Última actualización: {updatedAt.toLocaleTimeString("es-AR")}</div>}
+            {loadError && <div style={{marginTop:4,fontSize:12,color:AA.limon,maxWidth:260}}>{loadError}</div>}
           </div>
         </div>
 
@@ -343,20 +349,20 @@ export default function App(){
               borderLeft: tab===i ? `4px solid ${AA.limon}` : "4px solid transparent",
               transition:"all 0.2s",
             }}>
-              <div style={{fontSize:10,opacity:0.65,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{o.cod}</div>
-              <div style={{fontSize:15,fontWeight:700,marginTop:3,lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.corto}</div>
+              <div style={{fontSize:12,opacity:0.65,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{o.cod}</div>
+              <div style={{fontSize:17,fontWeight:700,marginTop:3,lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.corto}</div>
 
               {o.kind === "binary" ? (
                 <>
                   <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",marginTop:12}}>
-                    <span style={{fontSize:18,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.realLabel}</span>
+                    <span style={{fontSize:20,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.realLabel}</span>
                   </div>
-                  <div style={{fontSize:12,opacity:0.7,marginTop:6,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final: {o.metaLabel}</div>
+                  <div style={{fontSize:14,opacity:0.7,marginTop:6,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final: {o.metaLabel}</div>
                 </>
               ) : (
                 <>
                   <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",marginTop:12}}>
-                    <span style={{fontSize:28,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
+                    <span style={{fontSize:30,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
                   </div>
                   <div style={{background:"rgba(255,255,255,0.2)",borderRadius:3,height:4,marginTop:10}}>
                     <div style={{width:`${Math.min(o.ratio*100,100)}%`,background:statusColor(o.ratio),height:"100%",borderRadius:3}}/>
@@ -377,7 +383,7 @@ export default function App(){
               borderRadius:6,
               padding:"7px 22px",
               fontWeight:700,
-              fontSize:11,
+              fontSize:13,
               cursor:"pointer",
               transition:"all 0.2s",
               background: tab===i ? AA.verde : AA.blanco,
@@ -463,7 +469,7 @@ export default function App(){
                     }
                     return (
                       <tr key={i} style={{background:i%2===0?AA.grisBg:AA.blanco}}>
-                        <td style={td}>{m}{!esReal && <span style={{color:AA.grisClaro,fontSize:10}}> (proy.)</span>}</td>
+                        <td style={td}>{m}{!esReal && <span style={{color:AA.grisClaro,fontSize:12}}> (proy.)</span>}</td>
                         <td style={{...td,fontWeight:700,color:esReal?AA.texto:AA.grisClaro}}>{fmtN(conv)}</td>
                         <td style={{...td,color:esReal?AA.texto:AA.grisClaro}}>{fmtN(pax)}</td>
                         <td style={{...td,color:esReal?AA.texto:AA.grisClaro}}>{fmtP(adq)}</td>
