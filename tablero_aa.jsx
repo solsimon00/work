@@ -24,16 +24,19 @@ const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov"
 // OBJ1 datos
 const obj1Forecast = [0.331,0.332,0.330,0.332,0.339,0.346,0.351,0.355,0.362,0.371,0.382,0.382];
 const obj1Real     = [0.33, 0.33, 0.33, 0.30, 0.31, null,null,null,null,null,null,null];
+const meta1Final   = 0.38; // se evalúa con el dato de diciembre 2026
 
 // OBJ2 datos
 const base2025Mensual = [15821,9142,5231,7805,5734,4832,6097,3871,3034,6724,14300,12227];
 const real2026Mensual = [12478,10575,8341,5660,4068,null,null,null,null,null,null,null];
 const meta2026Mensual = base2025Mensual.map(v => Math.round(v * 1.15));
+const meta2Final = base2025Mensual.reduce((a,v)=>a+v,0) * 1.15; // meta anual total 2026
 
 // OBJ3 datos
-const meta2026Adq  = 0.036073 * 1.25;
 const base2025AAdqM = [0.0322,0.0309,0.0319,0.0295,0.0301,0.0303,0.0347,0.0360,0.0353,0.0373,0.0452,0.0557];
 const real2026Adq  = [0.04859,0.04713,0.04117,0.04002,0.03994,null,null,null,null,null,null,null];
+const base2025AdqTotal = 0.036073; // tasa total adquisición/pasajeros 2025
+const meta3Final = base2025AdqTotal * 1.25; // meta anual total 2026
 
 function statusColor(r){ return r>=1 ? AA.teal : r>=0.8 ? AA.limon : AA.danger; }
 function statusLabel(r){ return r>=1 ? "En meta" : r>=0.8 ? "Cerca" : "En riesgo"; }
@@ -51,7 +54,7 @@ function Bar({ ratio }){
   );
 }
 
-function Pill({ ratio }){
+function Pill({ ratio, text }){
   const c = statusColor(ratio);
   const isDark = c === AA.limon;
   return (
@@ -65,7 +68,7 @@ function Pill({ ratio }){
       letterSpacing: 0.5,
       textTransform: "uppercase",
     }}>
-      {statusLabel(ratio)}
+      {text || statusLabel(ratio)}
     </span>
   );
 }
@@ -104,7 +107,6 @@ const th={padding:"10px 14px",textAlign:"left",fontWeight:700,fontSize:11,letter
 const td={padding:"9px 14px",borderBottom:`1px solid #e2e8e8`};
 
 function ObjPanel({ obj, chart, table }){
-  const c=statusColor(obj.ratio);
   return (
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
       <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -113,12 +115,28 @@ function ObjPanel({ obj, chart, table }){
           <span style={{fontSize:10,color:AA.grisClaro,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{obj.cod}</span>
           <div style={{fontSize:16,fontWeight:700,color:AA.texto,margin:"8px 0 10px",lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.titulo}</div>
           <div style={{fontSize:12,color:AA.gris,lineHeight:1.7,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{obj.detalle}</div>
-          <Bar ratio={obj.ratio}/>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:AA.grisClaro,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
-            <span>0%</span>
-            <span style={{fontWeight:700,color:c}}>{pctN(obj.ratio,1)}% {obj.avanceLabel}</span>
-            <span>100%</span>
-          </div>
+
+          {obj.kind === "binary" ? (
+            <div style={{display:"flex",gap:10,marginTop:14}}>
+              <div style={{flex:1,background:AA.grisBg,borderRadius:8,padding:"12px 14px"}}>
+                <div style={{fontSize:10,color:AA.gris,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Real más reciente</div>
+                <div style={{fontSize:20,fontWeight:700,color:statusColor(obj.ratio),fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.realLabel}</div>
+              </div>
+              <div style={{flex:1,background:AA.limonClaro,borderRadius:8,padding:"12px 14px"}}>
+                <div style={{fontSize:10,color:AA.grisOscuro,textTransform:"uppercase",letterSpacing:0.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final (diciembre)</div>
+                <div style={{fontSize:20,fontWeight:700,color:AA.grisOscuro,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{obj.metaLabel}</div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Bar ratio={obj.ratio}/>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:AA.grisClaro,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
+                <span>0%</span>
+                <span style={{fontWeight:700,color:statusColor(obj.ratio)}}>{pctN(obj.ratio,1)}% de avance hacia la meta anual</span>
+                <span>100%</span>
+              </div>
+            </>
+          )}
         </div>
         {/* KPI stats */}
         <div style={{background:AA.blanco,borderRadius:10,padding:"20px 24px",boxShadow:"0 1px 6px rgba(0,115,129,0.10)",border:`1px solid #e2e8e8`}}>
@@ -148,56 +166,56 @@ function ObjPanel({ obj, chart, table }){
 export default function App(){
   const [tab, setTab]=useState(0);
 
-  // OBJ1: el cumplimiento es binario y se evalúa en diciembre (real dic vs 38%).
-  // El seguimiento mensual mide si el real viene en línea con el forecast del mes.
+  // OBJ1: objetivo binario, se cumple con el dato de diciembre (38%).
+  // El seguimiento mensual solo muestra si el real viene en línea con el forecast (no aplica % de avance).
   const lastR1=obj1Real.reduce((a,v,i)=>v!=null?i:a,-1);
   const ratio1=obj1Forecast[lastR1] ? obj1Real[lastR1]/obj1Forecast[lastR1] : 0;
 
-  // OBJ2: comparación acumulada YTD 2025 vs YTD 2026 (mismos meses transcurridos),
-  // contra el objetivo de +15% interanual.
+  // OBJ2: acumulado de facturación de los meses transcurridos de 2026 vs meta anual total
+  // (total 2025 + 15%). Avance% = acumulado / meta anual. Falta = meta anual - acumulado.
   const lastR2=real2026Mensual.reduce((a,v,i)=>v!=null?i:a,-1);
-  const acum2025YTD = base2025Mensual.slice(0,lastR2+1).reduce((a,v)=>a+v,0);
-  const acum2026YTD = real2026Mensual.slice(0,lastR2+1).reduce((a,v)=>a+(v||0),0);
-  const var2 = acum2025YTD ? (acum2026YTD/acum2025YTD - 1) : 0;
-  const ratio2 = var2/0.15;
+  const acum2026 = real2026Mensual.slice(0,lastR2+1).reduce((a,v)=>a+(v||0),0);
+  const falta2 = Math.max(meta2Final - acum2026, 0);
+  const ratio2 = acum2026/meta2Final;
 
-  // OBJ3: misma lógica acumulada (promedio de la tasa conversaciones/pasajeros)
-  // 2025 vs 2026, contra el objetivo de +25% interanual.
+  // OBJ3: acumulado (promedio) de la tasa de adquisición de los meses transcurridos de 2026
+  // vs meta anual total (total 2025 + 25 p.p. relativos). Avance% = acumulado / meta anual.
   const lastR3=real2026Adq.reduce((a,v,i)=>v!=null?i:a,-1);
-  const acum2025YTDAdq = base2025AAdqM.slice(0,lastR3+1).reduce((a,v)=>a+v,0)/(lastR3+1);
-  const acum2026YTDAdq = real2026Adq.slice(0,lastR3+1).reduce((a,v)=>a+(v||0),0)/(lastR3+1);
-  const var3 = acum2025YTDAdq ? (acum2026YTDAdq/acum2025YTDAdq - 1) : 0;
-  const ratio3 = var3/0.25;
+  const acum2026Adq = real2026Adq.slice(0,lastR3+1).reduce((a,v)=>a+(v||0),0)/(lastR3+1);
+  const falta3 = Math.max(meta3Final - acum2026Adq, 0);
+  const ratio3 = acum2026Adq/meta3Final;
 
   const objs=[
     {
-      cod:"OBJ 1", corto:"Penetración Parking", ratio:ratio1, avanceLabel:"vs forecast del mes",
+      cod:"OBJ 1", corto:"Penetración Parking", ratio:ratio1, kind:"binary",
       titulo:"38% penetración ADA en pagos de parking",
-      detalle:"Alcanzar que el 38% del total de pagos de estacionamiento se realicen a través de ADA al 31/12/2026. El cumplimiento se evalúa con el dato de diciembre; el seguimiento mensual compara el real contra el forecast.",
+      detalle:"Alcanzar que el 38% del total de pagos de estacionamiento se realicen a través de ADA al 31/12/2026. El objetivo se evalúa exclusivamente con el dato de diciembre; el seguimiento mensual muestra si el real viene en línea con el forecast.",
+      realLabel: fmtP(obj1Real[lastR1]) + ` (${MESES[lastR1]})`,
+      metaLabel: "38.0% (Dic)",
       kpis:[
-        {label:"Real mayo",      value:fmtP(obj1Real[lastR1]),     color:statusColor(ratio1)},
-        {label:"Forecast mayo",  value:fmtP(obj1Forecast[lastR1]), color:AA.verde},
-        {label:"Meta diciembre", value:"38.0%",                    color:AA.verde},
+        {label:"Real más reciente", value:fmtP(obj1Real[lastR1]),     color:statusColor(ratio1)},
+        {label:"Forecast del mes",  value:fmtP(obj1Forecast[lastR1]), color:AA.verde},
+        {label:"Meta diciembre",    value:"38.0%",                    color:AA.verde},
       ],
     },
     {
-      cod:"OBJ 2", corto:"Facturación No-Parking", ratio:ratio2, avanceLabel:"de la variación objetivo (+15%)",
+      cod:"OBJ 2", corto:"Facturación No-Parking", ratio:ratio2, kind:"cumulative",
       titulo:"+15% facturación ADA no-parking vs 2025",
-      detalle:"Incrementar en 15% la facturación en categorías no parking versus 2025 al 31/12/2026. Se compara el acumulado YTD 2026 contra el acumulado YTD 2025 (mismos meses transcurridos).",
+      detalle:"Incrementar en 15% la facturación en categorías no parking versus el total de 2025 al 31/12/2026. Se sigue el acumulado de los meses transcurridos de 2026 contra la meta anual total.",
       kpis:[
-        {label:"Acum. 2025 YTD (USD)", value:fmtU(acum2025YTD), color:AA.gris},
-        {label:"Acum. 2026 YTD (USD)", value:fmtU(acum2026YTD), color:statusColor(ratio2)},
-        {label:"Var. acumulada",       value:(var2*100).toFixed(1)+"%", color:statusColor(ratio2)},
+        {label:"Acumulado 2026 (USD)",  value:fmtU(acum2026), color:AA.verde},
+        {label:"Meta anual (USD)",      value:fmtU(meta2Final), color:AA.gris},
+        {label:"Falta facturar (USD)",  value:fmtU(falta2), color:statusColor(ratio2)},
       ],
     },
     {
-      cod:"OBJ 3", corto:"Adquisición ADA", ratio:ratio3, avanceLabel:"de la variación objetivo (+25%)",
+      cod:"OBJ 3", corto:"Adquisición ADA", ratio:ratio3, kind:"cumulative",
       titulo:"+25% adquisición ADA sobre pasajeros vs 2025",
-      detalle:"Incrementar en 25% la tasa de adquisición de ADA (conversaciones / pasajeros) versus 2025 al 31/12/2026. Se compara el promedio acumulado YTD 2026 contra el promedio acumulado YTD 2025.",
+      detalle:"Incrementar en 25% la tasa de adquisición de ADA (conversaciones / pasajeros) versus el total de 2025 al 31/12/2026. Se sigue el acumulado de los meses transcurridos de 2026 contra la meta anual total.",
       kpis:[
-        {label:"Acum. 2025 YTD", value:fmtP(acum2025YTDAdq), color:AA.gris},
-        {label:"Acum. 2026 YTD", value:fmtP(acum2026YTDAdq), color:statusColor(ratio3)},
-        {label:"Var. acumulada", value:(var3*100).toFixed(1)+"%", color:statusColor(ratio3)},
+        {label:"Acumulado 2026",    value:fmtP(acum2026Adq), color:AA.verde},
+        {label:"Meta anual",        value:fmtP(meta3Final),  color:AA.gris},
+        {label:"Falta (p.p.)",      value:fmtP(falta3),      color:statusColor(ratio3)},
       ],
     },
   ];
@@ -246,13 +264,26 @@ export default function App(){
             }}>
               <div style={{fontSize:9,opacity:0.65,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{o.cod}</div>
               <div style={{fontSize:13,fontWeight:700,marginTop:3,lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.corto}</div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
-                <Pill ratio={o.ratio}/>
-                <span style={{fontSize:24,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
-              </div>
-              <div style={{background:"rgba(255,255,255,0.2)",borderRadius:3,height:4,marginTop:10}}>
-                <div style={{width:`${Math.min(o.ratio*100,100)}%`,background:statusColor(o.ratio),height:"100%",borderRadius:3}}/>
-              </div>
+
+              {o.kind === "binary" ? (
+                <>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
+                    <Pill ratio={o.ratio}/>
+                    <span style={{fontSize:15,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.realLabel}</span>
+                  </div>
+                  <div style={{fontSize:10,opacity:0.7,marginTop:6,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final: {o.metaLabel}</div>
+                </>
+              ) : (
+                <>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
+                    <Pill ratio={o.ratio}/>
+                    <span style={{fontSize:24,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
+                  </div>
+                  <div style={{background:"rgba(255,255,255,0.2)",borderRadius:3,height:4,marginTop:10}}>
+                    <div style={{width:`${Math.min(o.ratio*100,100)}%`,background:statusColor(o.ratio),height:"100%",borderRadius:3}}/>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -283,14 +314,14 @@ export default function App(){
 
         {tab===0 && (
           <ObjPanel obj={objs[0]}
-            chart={<MiniChart real={obj1Real} forecast={obj1Forecast} meta={Array(12).fill(0.38)} title="Penetración ADA en Parking (%)"/>}
+            chart={<MiniChart real={obj1Real} forecast={obj1Forecast} meta={Array(12).fill(meta1Final)} title="Penetración ADA en Parking (%)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Real</th><th style={th}>Forecast</th><th style={th}>vs Forecast</th><th style={th}>Estado</th>
+                <th style={th}>Mes</th><th style={th}>Real</th><th style={th}>Forecast</th><th style={th}>Diferencia</th><th style={th}>Cómo viene</th>
               </tr></thead><tbody>
                 {MESES.map((m,i)=>{const r=obj1Real[i];const rt=r!=null?r/obj1Forecast[i]:null;const isDec=i===11;return(
                   <tr key={i} style={{background:isDec?AA.limonClaro:(i%2===0?AA.grisBg:AA.blanco)}}>
-                    <td style={{...td,fontWeight:isDec?700:400}}>{m}{isDec?" (meta 38%)":""}</td>
+                    <td style={{...td,fontWeight:isDec?700:400}}>{m}{isDec?" — meta final 38%":""}</td>
                     <td style={{...td,fontWeight:700,color:rt?statusColor(rt):AA.grisClaro}}>{fmtP(r)}</td>
                     <td style={{...td,color:AA.grisClaro}}>{fmtP(obj1Forecast[i])}</td>
                     <td style={{...td,color:AA.grisClaro}}>{rt!=null?(((rt-1)*100).toFixed(1)+"%"):"—"}</td>
@@ -306,24 +337,23 @@ export default function App(){
             chart={<MiniChart real={real2026Mensual} forecast={meta2026Mensual} meta={meta2026Mensual} title="Facturación No-Parking (USD mensual)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acum. 2025</th><th style={th}>Acum. 2026</th><th style={th}>Var. acumulada</th><th style={th}>Estado</th>
+                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acumulado 2026</th><th style={th}>% de meta anual</th><th style={th}>Falta (USD)</th><th style={th}>Estado</th>
               </tr></thead><tbody>
                 {(() => {
-                  let run2025=0, run2026=0;
+                  let run2026=0;
                   return MESES.map((m,i)=>{
-                    run2025+=base2025Mensual[i];
                     const r=real2026Mensual[i];
                     if(r!=null) run2026+=r;
-                    const varAcum = r!=null ? (run2026/run2025-1) : null;
-                    const rt = varAcum!=null ? varAcum/0.15 : null;
+                    const avancePct = r!=null ? run2026/meta2Final : null;
+                    const falta = r!=null ? Math.max(meta2Final-run2026,0) : null;
                     return (
                       <tr key={i} style={{background:i%2===0?AA.grisBg:AA.blanco}}>
                         <td style={td}>{m}</td>
                         <td style={{...td,fontWeight:700,color:r!=null?AA.texto:AA.grisClaro}}>{fmtU(r)}</td>
-                        <td style={td}>{fmtU(run2025)}</td>
                         <td style={{...td,color:r!=null?AA.verde:AA.grisClaro,fontWeight:600}}>{r!=null?fmtU(run2026):"—"}</td>
-                        <td style={{...td,fontWeight:700,color:rt?statusColor(rt):AA.grisClaro}}>{varAcum!=null?((varAcum*100).toFixed(1)+"%"):"—"}</td>
-                        <td style={td}>{rt?<Pill ratio={rt}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
+                        <td style={{...td,fontWeight:700,color:avancePct?statusColor(avancePct):AA.grisClaro}}>{avancePct!=null?((avancePct*100).toFixed(1)+"%"):"—"}</td>
+                        <td style={{...td,color:AA.grisClaro}}>{falta!=null?fmtU(falta):"—"}</td>
+                        <td style={td}>{avancePct?<Pill ratio={avancePct}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
                       </tr>
                     );
                   });
@@ -335,29 +365,27 @@ export default function App(){
 
         {tab===2 && (
           <ObjPanel obj={objs[2]}
-            chart={<MiniChart real={real2026Adq} forecast={Array(12).fill(meta2026Adq)} meta={Array(12).fill(meta2026Adq)} title="Adquisición ADA / Pasajeros (%)"/>}
+            chart={<MiniChart real={real2026Adq} forecast={Array(12).fill(meta3Final)} meta={Array(12).fill(meta3Final)} title="Adquisición ADA / Pasajeros (%)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acum. 2025</th><th style={th}>Acum. 2026</th><th style={th}>Var. acumulada</th><th style={th}>Estado</th>
+                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acumulado 2026</th><th style={th}>% de meta anual</th><th style={th}>Falta (p.p.)</th><th style={th}>Estado</th>
               </tr></thead><tbody>
                 {(() => {
-                  let run2025=0, run2026=0, n=0;
+                  let run2026=0, n=0;
                   return MESES.map((m,i)=>{
-                    run2025+=base2025AAdqM[i];
                     const r=real2026Adq[i];
                     if(r!=null){ run2026+=r; n+=1; }
-                    const acum2025 = run2025/(i+1);
                     const acum2026 = n ? run2026/n : null;
-                    const varAcum = acum2026!=null ? (acum2026/acum2025-1) : null;
-                    const rt = varAcum!=null ? varAcum/0.25 : null;
+                    const avancePct = acum2026!=null ? acum2026/meta3Final : null;
+                    const falta = acum2026!=null ? Math.max(meta3Final-acum2026,0) : null;
                     return (
                       <tr key={i} style={{background:i%2===0?AA.grisBg:AA.blanco}}>
                         <td style={td}>{m}</td>
                         <td style={{...td,fontWeight:700,color:r!=null?AA.texto:AA.grisClaro}}>{fmtP(r)}</td>
-                        <td style={td}>{fmtP(acum2025)}</td>
                         <td style={{...td,color:r!=null?AA.verde:AA.grisClaro,fontWeight:600}}>{acum2026!=null?fmtP(acum2026):"—"}</td>
-                        <td style={{...td,fontWeight:700,color:rt?statusColor(rt):AA.grisClaro}}>{varAcum!=null?((varAcum*100).toFixed(1)+"%"):"—"}</td>
-                        <td style={td}>{rt?<Pill ratio={rt}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
+                        <td style={{...td,fontWeight:700,color:avancePct?statusColor(avancePct):AA.grisClaro}}>{avancePct!=null?((avancePct*100).toFixed(1)+"%"):"—"}</td>
+                        <td style={{...td,color:AA.grisClaro}}>{falta!=null?fmtP(falta):"—"}</td>
+                        <td style={td}>{avancePct?<Pill ratio={avancePct}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
                       </tr>
                     );
                   });
