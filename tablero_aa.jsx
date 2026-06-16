@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Paleta oficial — Guía Visual Aeropuertos Argentina 2024 V07
 const AA = {
@@ -21,29 +21,63 @@ const AA = {
 
 const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
-// OBJ1 datos
-const obj1Forecast = [0.331,0.332,0.330,0.332,0.339,0.346,0.351,0.355,0.362,0.371,0.382,0.382];
-const obj1Real     = [0.33, 0.33, 0.33, 0.30, 0.31, null,null,null,null,null,null,null];
-const meta1Final   = 0.38; // se evalúa con el dato de diciembre 2026
+// Datos por defecto (se usan mientras carga la planilla o si falla la conexión).
+// La planilla de Google Sheets publicada los sobreescribe en tiempo real.
+const DEFAULTS = {
+  obj1Forecast: [0.331,0.332,0.330,0.332,0.339,0.346,0.351,0.355,0.362,0.371,0.382,0.382],
+  obj1Real:     [0.33, 0.33, 0.33, 0.30, 0.31, null,null,null,null,null,null,null],
+  base2025Mensual: [15821,9142,5231,7805,5734,4832,6097,3871,3034,6724,14300,12227],
+  real2026Mensual: [12478,10575,8341,5660,4068,null,null,null,null,null,null,null],
+  conv2026: [221264,189445,175572,145804,133340,165115,199830,177484,166034,167130,193619,219219],
+  pax2026:  [4553378,4019397,4264675,3642907,3338468,3513084,4344125,4225813,3953184,3979287,3951415,4473847],
+  meta1Final: 0.38,             // se evalúa con el dato de diciembre 2026
+  base2025AdqTotal: 0.036073,   // tasa total adquisición/pasajeros 2025
+};
 
-// OBJ2 datos
-const base2025Mensual = [15821,9142,5231,7805,5734,4832,6097,3871,3034,6724,14300,12227];
-const real2026Mensual = [12478,10575,8341,5660,4068,null,null,null,null,null,null,null];
-const meta2026Mensual = base2025Mensual.map(v => Math.round(v * 1.15));
-const meta2Final = base2025Mensual.reduce((a,v)=>a+v,0) * 1.15; // meta anual total 2026
+// Planilla de Google Sheets publicada como CSV — fuente de datos en vivo.
+const DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvUQBCiO2CenQLa1yGGU9BlcCYEpbnxinmAyI_68geZxcEpavhy9nECHb3Vg600vTWusw4evbJlQH6/pub?output=csv";
 
-// OBJ3 datos
-const base2025AAdqM = [0.0322,0.0309,0.0319,0.0295,0.0301,0.0303,0.0347,0.0360,0.0353,0.0373,0.0452,0.0557];
-const real2026Adq  = [0.04859,0.04713,0.04117,0.04002,0.03994,null,null,null,null,null,null,null];
-const base2025AdqTotal = 0.036073; // tasa total adquisición/pasajeros 2025
-const meta3Final = base2025AdqTotal * 1.25; // meta anual total 2026 (tasa)
+function parseNum(s){
+  if(s==null) return null;
+  const t=String(s).trim();
+  if(t==="") return null;
+  const v=parseFloat(t.replace(/[^0-9.\-]/g,""));
+  return isNaN(v) ? null : v;
+}
 
-// Conversaciones y pasajeros 2026 (ene-may real, jun-dic forecast/budget)
-const conv2026 = [221264,189445,175572,145804,133340,165115,199830,177484,166034,167130,193619,219219];
-const pax2026  = [4553378,4019397,4264675,3642907,3338468,3513084,4344125,4225813,3953184,3979287,3951415,4473847];
-const N_REAL_3 = 5; // cantidad de meses con dato real (ene-may)
-const paxTotal2026 = pax2026.reduce((a,v)=>a+v,0);
-const convMetaAnual = meta3Final * paxTotal2026; // conversaciones necesarias para cumplir la meta anual
+// La planilla debe tener una fila por mes (Ene..Dic) con columnas:
+// Mes, OBJ1_Forecast, OBJ1_Real, OBJ2_Base2025, OBJ2_Real2026, Conversaciones2026, Pasajeros2026
+// y dos filas extra con constantes anuales: "Meta1Final" y "Base2025AdqTotal" (columna B = valor).
+function parseSheet(csvText){
+  const rows = csvText.trim().split(/\r?\n/).map(l => l.split(",").map(c => c.trim().replace(/^"|"$/g,"")));
+  const d = {
+    obj1Forecast: [...DEFAULTS.obj1Forecast],
+    obj1Real: [...DEFAULTS.obj1Real],
+    base2025Mensual: [...DEFAULTS.base2025Mensual],
+    real2026Mensual: [...DEFAULTS.real2026Mensual],
+    conv2026: [...DEFAULTS.conv2026],
+    pax2026: [...DEFAULTS.pax2026],
+    meta1Final: DEFAULTS.meta1Final,
+    base2025AdqTotal: DEFAULTS.base2025AdqTotal,
+  };
+  for(const row of rows){
+    const key = row[0];
+    const idx = MESES.indexOf(key);
+    if(idx>=0){
+      const f1=parseNum(row[1]); if(f1!=null) d.obj1Forecast[idx]=f1;
+      d.obj1Real[idx]=parseNum(row[2]);
+      const b2=parseNum(row[3]); if(b2!=null) d.base2025Mensual[idx]=b2;
+      d.real2026Mensual[idx]=parseNum(row[4]);
+      const c=parseNum(row[5]); if(c!=null) d.conv2026[idx]=c;
+      const p=parseNum(row[6]); if(p!=null) d.pax2026[idx]=p;
+    } else if(key==="Meta1Final"){
+      const v=parseNum(row[1]); if(v!=null) d.meta1Final=v;
+    } else if(key==="Base2025AdqTotal"){
+      const v=parseNum(row[1]); if(v!=null) d.base2025AdqTotal=v;
+    }
+  }
+  return d;
+}
 
 function statusColor(r){ return r>=1 ? AA.teal : r>=0.8 ? AA.limon : AA.danger; }
 function statusLabel(r){ return r>=1 ? "En meta" : r>=0.8 ? "Cerca" : "En riesgo"; }
@@ -173,39 +207,67 @@ function ObjPanel({ obj, chart, table }){
 
 export default function App(){
   const [tab, setTab]=useState(0);
+  const [data, setData]=useState(DEFAULTS);
+  const [updatedAt, setUpdatedAt]=useState(null);
+  const [loading, setLoading]=useState(false);
+  const [loadError, setLoadError]=useState(null);
+
+  function loadData(){
+    setLoading(true); setLoadError(null);
+    fetch(DATA_URL + (DATA_URL.includes("?") ? "&" : "?") + "_=" + Date.now())
+      .then(r => { if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
+      .then(text => { setData(parseSheet(text)); setUpdatedAt(new Date()); })
+      .catch(e => setLoadError("No se pudo actualizar desde Google Sheets: " + e.message))
+      .finally(() => setLoading(false));
+  }
+  useEffect(() => { loadData(); }, []);
+
+  const obj1Forecast = data.obj1Forecast;
+  const obj1Real = data.obj1Real;
+  const base2025Mensual = data.base2025Mensual;
+  const real2026Mensual = data.real2026Mensual;
+  const meta2026Mensual = base2025Mensual.map(v => Math.round(v * 1.15));
+  const meta1Final = data.meta1Final;
+  const meta2Final = base2025Mensual.reduce((a,v)=>a+v,0) * 1.15;
+  const meta3Final = data.base2025AdqTotal * 1.25;
+  const conv2026 = data.conv2026;
+  const pax2026 = data.pax2026;
+  const paxTotal2026 = pax2026.reduce((a,v)=>a+v,0);
+  const convMetaAnual = meta3Final * paxTotal2026;
 
   // OBJ1: objetivo binario, se cumple con el dato de diciembre (38%).
   // El seguimiento mensual solo muestra si el real viene en línea con el forecast (no aplica % de avance).
   const lastR1=obj1Real.reduce((a,v,i)=>v!=null?i:a,-1);
-  const ratio1=obj1Forecast[lastR1] ? obj1Real[lastR1]/obj1Forecast[lastR1] : 0;
+  const ratio1=lastR1>=0 && obj1Forecast[lastR1] ? obj1Real[lastR1]/obj1Forecast[lastR1] : 0;
 
   // OBJ2: acumulado de facturación de los meses transcurridos de 2026 vs meta anual total
   // (total 2025 + 15%). Avance% = acumulado / meta anual. Falta = meta anual - acumulado.
   const lastR2=real2026Mensual.reduce((a,v,i)=>v!=null?i:a,-1);
   const acum2026 = real2026Mensual.slice(0,lastR2+1).reduce((a,v)=>a+(v||0),0);
   const falta2 = Math.max(meta2Final - acum2026, 0);
-  const ratio2 = acum2026/meta2Final;
+  const ratio2 = meta2Final ? acum2026/meta2Final : 0;
 
   // OBJ3: tasa acumulada (para seguimiento/contexto) y conversaciones absolutas:
   // el % de avance se calcula como conversaciones reales acumuladas / conversaciones
   // necesarias para cumplir la meta anual (tasa meta * pasajeros totales 2026).
-  const lastR3=real2026Adq.reduce((a,v,i)=>v!=null?i:a,-1);
-  const acum2026Adq = real2026Adq.slice(0,lastR3+1).reduce((a,v)=>a+(v||0),0)/(lastR3+1);
+  // Se toma como "real" la misma cantidad de meses transcurridos que en OBJ2.
+  const N_REAL_3 = lastR2+1;
+  const real2026Adq = pax2026.map((p,i) => (i<N_REAL_3 && p) ? conv2026[i]/p : null);
   const convAcum3 = conv2026.slice(0,N_REAL_3).reduce((a,v)=>a+v,0);
   const convFaltan3 = Math.max(convMetaAnual - convAcum3, 0);
-  const ratio3 = convAcum3/convMetaAnual;
+  const ratio3 = convMetaAnual ? convAcum3/convMetaAnual : 0;
 
   const objs=[
     {
       cod:"OBJ 1", corto:"Penetración Parking", ratio:ratio1, kind:"binary",
       titulo:"38% penetración ADA en pagos de parking",
       detalle:"Alcanzar que el 38% del total de pagos de estacionamiento se realicen a través de ADA al 31/12/2026. El objetivo se evalúa exclusivamente con el dato de diciembre; el seguimiento mensual muestra si el real viene en línea con el forecast.",
-      realLabel: fmtP(obj1Real[lastR1]) + ` (${MESES[lastR1]})`,
-      metaLabel: "38.0% (Dic)",
+      realLabel: lastR1>=0 ? fmtP(obj1Real[lastR1]) + ` (${MESES[lastR1]})` : "—",
+      metaLabel: fmtP(meta1Final) + " (Dic)",
       kpis:[
-        {label:"Real más reciente", value:fmtP(obj1Real[lastR1]),     color:statusColor(ratio1)},
-        {label:"Forecast del mes",  value:fmtP(obj1Forecast[lastR1]), color:AA.verde},
-        {label:"Meta diciembre",    value:"38.0%",                    color:AA.verde},
+        {label:"Real más reciente", value:lastR1>=0?fmtP(obj1Real[lastR1]):"—", color:statusColor(ratio1)},
+        {label:"Forecast del mes",  value:lastR1>=0?fmtP(obj1Forecast[lastR1]):"—", color:AA.verde},
+        {label:"Meta diciembre",    value:fmtP(meta1Final),          color:AA.verde},
       ],
     },
     {
@@ -256,8 +318,17 @@ export default function App(){
             </div>
           </div>
           <div style={{textAlign:"right",fontSize:11,opacity:0.8,fontFamily:"'Open Sans','Verdana',sans-serif"}}>
-            <div>Datos hasta mayo 2026</div>
-            <div style={{marginTop:5,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:"4px 16px",display:"inline-block",fontWeight:600,letterSpacing:0.5}}>5 / 12 meses</div>
+            <div>{lastR2>=0 ? `Datos hasta ${MESES[lastR2]} 2026` : "Sin datos cargados"}</div>
+            <div style={{marginTop:5,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:"4px 16px",display:"inline-block",fontWeight:600,letterSpacing:0.5}}>{lastR2+1} / 12 meses</div>
+            <div style={{marginTop:8,display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end"}}>
+              <button onClick={loadData} disabled={loading} style={{
+                background:"rgba(255,255,255,0.18)", color:"#fff", border:"1px solid rgba(255,255,255,0.4)",
+                borderRadius:16, padding:"4px 14px", fontSize:11, fontWeight:600, cursor:loading?"default":"pointer",
+                fontFamily:"'Open Sans','Verdana',sans-serif",
+              }}>{loading ? "Actualizando..." : "Actualizar datos"}</button>
+            </div>
+            {updatedAt && <div style={{marginTop:4,fontSize:10,opacity:0.7}}>Última actualización: {updatedAt.toLocaleTimeString("es-AR")}</div>}
+            {loadError && <div style={{marginTop:4,fontSize:10,color:AA.limon,maxWidth:260}}>{loadError}</div>}
           </div>
         </div>
 
@@ -329,7 +400,7 @@ export default function App(){
               </tr></thead><tbody>
                 {MESES.map((m,i)=>{const r=obj1Real[i];const rt=r!=null?r/obj1Forecast[i]:null;const isDec=i===11;return(
                   <tr key={i} style={{background:isDec?AA.limonClaro:(i%2===0?AA.grisBg:AA.blanco)}}>
-                    <td style={{...td,fontWeight:isDec?700:400}}>{m}{isDec?" — meta final 38%":""}</td>
+                    <td style={{...td,fontWeight:isDec?700:400}}>{m}{isDec?` — meta final ${fmtP(meta1Final)}`:""}</td>
                     <td style={{...td,fontWeight:700,color:rt?statusColor(rt):AA.grisClaro}}>{fmtP(r)}</td>
                     <td style={{...td,color:AA.grisClaro}}>{fmtP(obj1Forecast[i])}</td>
                     <td style={{...td,color:AA.grisClaro}}>{rt!=null?(((rt-1)*100).toFixed(1)+"%"):"—"}</td>
