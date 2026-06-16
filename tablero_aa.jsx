@@ -277,16 +277,14 @@ export default function App(){
 
               {o.kind === "binary" ? (
                 <>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
-                    <Pill ratio={o.ratio}/>
+                  <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",marginTop:12}}>
                     <span style={{fontSize:15,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.realLabel}</span>
                   </div>
                   <div style={{fontSize:10,opacity:0.7,marginTop:6,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final: {o.metaLabel}</div>
                 </>
               ) : (
                 <>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12}}>
-                    <Pill ratio={o.ratio}/>
+                  <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",marginTop:12}}>
                     <span style={{fontSize:24,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
                   </div>
                   <div style={{background:"rgba(255,255,255,0.2)",borderRadius:3,height:4,marginTop:10}}>
