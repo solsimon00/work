@@ -36,13 +36,21 @@ const meta2Final = base2025Mensual.reduce((a,v)=>a+v,0) * 1.15; // meta anual to
 const base2025AAdqM = [0.0322,0.0309,0.0319,0.0295,0.0301,0.0303,0.0347,0.0360,0.0353,0.0373,0.0452,0.0557];
 const real2026Adq  = [0.04859,0.04713,0.04117,0.04002,0.03994,null,null,null,null,null,null,null];
 const base2025AdqTotal = 0.036073; // tasa total adquisición/pasajeros 2025
-const meta3Final = base2025AdqTotal * 1.25; // meta anual total 2026
+const meta3Final = base2025AdqTotal * 1.25; // meta anual total 2026 (tasa)
+
+// Conversaciones y pasajeros 2026 (ene-may real, jun-dic forecast/budget)
+const conv2026 = [221264,189445,175572,145804,133340,165115,199830,177484,166034,167130,193619,219219];
+const pax2026  = [4553378,4019397,4264675,3642907,3338468,3513084,4344125,4225813,3953184,3979287,3951415,4473847];
+const N_REAL_3 = 5; // cantidad de meses con dato real (ene-may)
+const paxTotal2026 = pax2026.reduce((a,v)=>a+v,0);
+const convMetaAnual = meta3Final * paxTotal2026; // conversaciones necesarias para cumplir la meta anual
 
 function statusColor(r){ return r>=1 ? AA.teal : r>=0.8 ? AA.limon : AA.danger; }
 function statusLabel(r){ return r>=1 ? "En meta" : r>=0.8 ? "Cerca" : "En riesgo"; }
 function pctN(v,t){ return t ? Math.round((v/t)*100) : 0; }
 function fmtP(n){ return n!=null ? (n*100).toFixed(1)+"%" : "—"; }
 function fmtU(n){ return n!=null ? "$"+Math.round(n).toLocaleString("es-AR") : "—"; }
+function fmtN(n){ return n!=null ? Math.round(n).toLocaleString("es-AR") : "—"; }
 
 function Bar({ ratio }){
   const c = statusColor(ratio);
@@ -178,12 +186,14 @@ export default function App(){
   const falta2 = Math.max(meta2Final - acum2026, 0);
   const ratio2 = acum2026/meta2Final;
 
-  // OBJ3: acumulado (promedio) de la tasa de adquisición de los meses transcurridos de 2026
-  // vs meta anual total (total 2025 + 25 p.p. relativos). Avance% = acumulado / meta anual.
+  // OBJ3: tasa acumulada (para seguimiento/contexto) y conversaciones absolutas:
+  // el % de avance se calcula como conversaciones reales acumuladas / conversaciones
+  // necesarias para cumplir la meta anual (tasa meta * pasajeros totales 2026).
   const lastR3=real2026Adq.reduce((a,v,i)=>v!=null?i:a,-1);
   const acum2026Adq = real2026Adq.slice(0,lastR3+1).reduce((a,v)=>a+(v||0),0)/(lastR3+1);
-  const falta3 = Math.max(meta3Final - acum2026Adq, 0);
-  const ratio3 = acum2026Adq/meta3Final;
+  const convAcum3 = conv2026.slice(0,N_REAL_3).reduce((a,v)=>a+v,0);
+  const convFaltan3 = Math.max(convMetaAnual - convAcum3, 0);
+  const ratio3 = convAcum3/convMetaAnual;
 
   const objs=[
     {
@@ -211,11 +221,11 @@ export default function App(){
     {
       cod:"OBJ 3", corto:"Adquisición ADA", ratio:ratio3, kind:"cumulative",
       titulo:"+25% adquisición ADA sobre pasajeros vs 2025",
-      detalle:"Incrementar en 25% la tasa de adquisición de ADA (conversaciones / pasajeros) versus el total de 2025 al 31/12/2026. Se sigue el acumulado de los meses transcurridos de 2026 contra la meta anual total.",
+      detalle:"Incrementar en 25% la tasa de adquisición de ADA (conversaciones / pasajeros) versus el total de 2025 al 31/12/2026. El % de avance se mide en conversaciones absolutas: acumulado real de conversaciones vs. conversaciones necesarias para cumplir la meta anual.",
       kpis:[
-        {label:"Acumulado 2026",    value:fmtP(acum2026Adq), color:AA.verde},
-        {label:"Meta anual",        value:fmtP(meta3Final),  color:AA.gris},
-        {label:"Falta (p.p.)",      value:fmtP(falta3),      color:statusColor(ratio3)},
+        {label:"Conversaciones acumuladas 2026",  value:fmtN(convAcum3), color:AA.verde},
+        {label:"Meta anual (conversaciones)",      value:fmtN(convMetaAnual), color:AA.gris},
+        {label:"Faltan conversaciones",            value:fmtN(convFaltan3), color:statusColor(ratio3)},
       ],
     },
   ];
@@ -368,24 +378,32 @@ export default function App(){
             chart={<MiniChart real={real2026Adq} forecast={Array(12).fill(meta3Final)} meta={Array(12).fill(meta3Final)} title="Adquisición ADA / Pasajeros (%)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acumulado 2026</th><th style={th}>% de meta anual</th><th style={th}>Falta (p.p.)</th><th style={th}>Estado</th>
+                <th style={th}>Mes</th><th style={th}>Conversaciones</th><th style={th}>Pasajeros</th><th style={th}>Adquisición %</th><th style={th}>Conv. acumuladas (real)</th><th style={th}>% avance</th><th style={th}>Faltan conv.</th><th style={th}>Estado</th>
               </tr></thead><tbody>
                 {(() => {
-                  let run2026=0, n=0;
+                  let runConv=0;
                   return MESES.map((m,i)=>{
-                    const r=real2026Adq[i];
-                    if(r!=null){ run2026+=r; n+=1; }
-                    const acum2026 = n ? run2026/n : null;
-                    const avancePct = acum2026!=null ? acum2026/meta3Final : null;
-                    const falta = acum2026!=null ? Math.max(meta3Final-acum2026,0) : null;
+                    const esReal = i < N_REAL_3;
+                    const conv = conv2026[i];
+                    const pax = pax2026[i];
+                    const adq = real2026Adq[i]!=null ? real2026Adq[i] : (pax ? conv/pax : null);
+                    let acumConv = null, avancePct = null, faltan = null;
+                    if(esReal){
+                      runConv += conv;
+                      acumConv = runConv;
+                      avancePct = convMetaAnual ? acumConv/convMetaAnual : null;
+                      faltan = Math.max(convMetaAnual-acumConv,0);
+                    }
                     return (
                       <tr key={i} style={{background:i%2===0?AA.grisBg:AA.blanco}}>
-                        <td style={td}>{m}</td>
-                        <td style={{...td,fontWeight:700,color:r!=null?AA.texto:AA.grisClaro}}>{fmtP(r)}</td>
-                        <td style={{...td,color:r!=null?AA.verde:AA.grisClaro,fontWeight:600}}>{acum2026!=null?fmtP(acum2026):"—"}</td>
-                        <td style={{...td,fontWeight:700,color:avancePct?statusColor(avancePct):AA.grisClaro}}>{avancePct!=null?((avancePct*100).toFixed(1)+"%"):"—"}</td>
-                        <td style={{...td,color:AA.grisClaro}}>{falta!=null?fmtP(falta):"—"}</td>
-                        <td style={td}>{avancePct?<Pill ratio={avancePct}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
+                        <td style={td}>{m}{!esReal && <span style={{color:AA.grisClaro,fontSize:10}}> (proy.)</span>}</td>
+                        <td style={{...td,fontWeight:700,color:esReal?AA.texto:AA.grisClaro}}>{fmtN(conv)}</td>
+                        <td style={{...td,color:esReal?AA.texto:AA.grisClaro}}>{fmtN(pax)}</td>
+                        <td style={{...td,color:esReal?AA.texto:AA.grisClaro}}>{fmtP(adq)}</td>
+                        <td style={{...td,color:esReal?AA.verde:AA.grisClaro,fontWeight:600}}>{acumConv!=null?fmtN(acumConv):"—"}</td>
+                        <td style={{...td,fontWeight:700,color:avancePct!=null?statusColor(avancePct):AA.grisClaro}}>{avancePct!=null?((avancePct*100).toFixed(1)+"%"):"—"}</td>
+                        <td style={{...td,color:AA.grisClaro}}>{faltan!=null?fmtN(faltan):"—"}</td>
+                        <td style={td}>{avancePct!=null?<Pill ratio={avancePct}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
                       </tr>
                     );
                   });
