@@ -272,20 +272,20 @@ export default function App(){
               borderLeft: tab===i ? `4px solid ${AA.limon}` : "4px solid transparent",
               transition:"all 0.2s",
             }}>
-              <div style={{fontSize:9,opacity:0.65,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{o.cod}</div>
-              <div style={{fontSize:13,fontWeight:700,marginTop:3,lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.corto}</div>
+              <div style={{fontSize:10,opacity:0.65,textTransform:"uppercase",letterSpacing:2.5,fontFamily:"'Open Sans','Verdana',sans-serif"}}>{o.cod}</div>
+              <div style={{fontSize:15,fontWeight:700,marginTop:3,lineHeight:1.35,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.corto}</div>
 
               {o.kind === "binary" ? (
                 <>
                   <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",marginTop:12}}>
-                    <span style={{fontSize:15,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.realLabel}</span>
+                    <span style={{fontSize:18,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{o.realLabel}</span>
                   </div>
-                  <div style={{fontSize:10,opacity:0.7,marginTop:6,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final: {o.metaLabel}</div>
+                  <div style={{fontSize:12,opacity:0.7,marginTop:6,fontFamily:"'Open Sans','Verdana',sans-serif"}}>Meta final: {o.metaLabel}</div>
                 </>
               ) : (
                 <>
                   <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",marginTop:12}}>
-                    <span style={{fontSize:24,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
+                    <span style={{fontSize:28,fontWeight:700,fontFamily:"'Kanit','Trebuchet MS',sans-serif"}}>{pctN(o.ratio,1)}%</span>
                   </div>
                   <div style={{background:"rgba(255,255,255,0.2)",borderRadius:3,height:4,marginTop:10}}>
                     <div style={{width:`${Math.min(o.ratio*100,100)}%`,background:statusColor(o.ratio),height:"100%",borderRadius:3}}/>
