@@ -327,7 +327,7 @@ export default function App(){
             chart={<MiniChart real={obj1Real} forecast={obj1Forecast} meta={Array(12).fill(meta1Final)} title="Penetración ADA en Parking (%)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Real</th><th style={th}>Forecast</th><th style={th}>Diferencia</th><th style={th}>Cómo viene</th>
+                <th style={th}>Mes</th><th style={th}>Real</th><th style={th}>Forecast</th><th style={th}>Diferencia</th>
               </tr></thead><tbody>
                 {MESES.map((m,i)=>{const r=obj1Real[i];const rt=r!=null?r/obj1Forecast[i]:null;const isDec=i===11;return(
                   <tr key={i} style={{background:isDec?AA.limonClaro:(i%2===0?AA.grisBg:AA.blanco)}}>
@@ -335,7 +335,6 @@ export default function App(){
                     <td style={{...td,fontWeight:700,color:rt?statusColor(rt):AA.grisClaro}}>{fmtP(r)}</td>
                     <td style={{...td,color:AA.grisClaro}}>{fmtP(obj1Forecast[i])}</td>
                     <td style={{...td,color:AA.grisClaro}}>{rt!=null?(((rt-1)*100).toFixed(1)+"%"):"—"}</td>
-                    <td style={td}>{rt?<Pill ratio={rt}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
                   </tr>);})}
               </tbody></table>
             }
@@ -347,7 +346,7 @@ export default function App(){
             chart={<MiniChart real={real2026Mensual} forecast={meta2026Mensual} meta={meta2026Mensual} title="Facturación No-Parking (USD mensual)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acumulado 2026</th><th style={th}>% de meta anual</th><th style={th}>Falta (USD)</th><th style={th}>Estado</th>
+                <th style={th}>Mes</th><th style={th}>Real mensual</th><th style={th}>Acumulado 2026</th><th style={th}>% de meta anual</th><th style={th}>Falta (USD)</th>
               </tr></thead><tbody>
                 {(() => {
                   let run2026=0;
@@ -363,7 +362,6 @@ export default function App(){
                         <td style={{...td,color:r!=null?AA.verde:AA.grisClaro,fontWeight:600}}>{r!=null?fmtU(run2026):"—"}</td>
                         <td style={{...td,fontWeight:700,color:avancePct?statusColor(avancePct):AA.grisClaro}}>{avancePct!=null?((avancePct*100).toFixed(1)+"%"):"—"}</td>
                         <td style={{...td,color:AA.grisClaro}}>{falta!=null?fmtU(falta):"—"}</td>
-                        <td style={td}>{avancePct?<Pill ratio={avancePct}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
                       </tr>
                     );
                   });
@@ -378,7 +376,7 @@ export default function App(){
             chart={<MiniChart real={real2026Adq} forecast={Array(12).fill(meta3Final)} meta={Array(12).fill(meta3Final)} title="Adquisición ADA / Pasajeros (%)"/>}
             table={
               <table style={tS}><thead><tr style={thR}>
-                <th style={th}>Mes</th><th style={th}>Conversaciones</th><th style={th}>Pasajeros</th><th style={th}>Adquisición %</th><th style={th}>Conv. acumuladas (real)</th><th style={th}>% avance</th><th style={th}>Faltan conv.</th><th style={th}>Estado</th>
+                <th style={th}>Mes</th><th style={th}>Conversaciones</th><th style={th}>Pasajeros</th><th style={th}>Adquisición %</th><th style={th}>Conv. acumuladas (real)</th><th style={th}>% avance</th><th style={th}>Faltan conv.</th>
               </tr></thead><tbody>
                 {(() => {
                   let runConv=0;
@@ -403,7 +401,6 @@ export default function App(){
                         <td style={{...td,color:esReal?AA.verde:AA.grisClaro,fontWeight:600}}>{acumConv!=null?fmtN(acumConv):"—"}</td>
                         <td style={{...td,fontWeight:700,color:avancePct!=null?statusColor(avancePct):AA.grisClaro}}>{avancePct!=null?((avancePct*100).toFixed(1)+"%"):"—"}</td>
                         <td style={{...td,color:AA.grisClaro}}>{faltan!=null?fmtN(faltan):"—"}</td>
-                        <td style={td}>{avancePct!=null?<Pill ratio={avancePct}/>:<span style={{color:AA.grisClaro,fontSize:11}}>—</span>}</td>
                       </tr>
                     );
                   });
