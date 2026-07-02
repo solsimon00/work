@@ -172,7 +172,13 @@ td{padding:9px 10px;font-size:13px;}
     </div>
 
     <div class="card" style="margin-bottom:28px">
-      <div class="card-title">Sesiones y participantes por dia</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+        <div class="card-title" style="margin-bottom:0">Sesiones y participantes por dia</div>
+        <div id="acum-sesiones-granularity" style="display:flex;gap:4px">
+          <button onclick="setAcumGranularity('dia',this)" class="active" style="padding:4px 14px;border-radius:14px;font-family:'Kanit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border:2px solid var(--verde);background:var(--verde);color:#fff;transition:all .2s">Por día</button>
+          <button onclick="setAcumGranularity('mes',this)" style="padding:4px 14px;border-radius:14px;font-family:'Kanit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border:2px solid var(--verde);background:#fff;color:var(--verde);transition:all .2s">Por mes</button>
+        </div>
+      </div>
       <div class="card-subtitle" id="acum-sesiones-sub">Evolucion diaria en el rango seleccionado</div>
       <div class="chart-wrap" style="height:260px"><canvas id="canvas-acum-sesiones"></canvas></div>
     </div>
@@ -2684,10 +2690,38 @@ function acumRenderBarList(elId,mapa,unidad){
 }
 function fechaLabel(f){ return parseInt(f.slice(8,10),10)+' jun'; }
 let acumChartSesiones=null;
+let acumGranularity='dia';
+let acumDiasActuales=[];
+function setAcumGranularity(g,btn){
+  acumGranularity=g;
+  document.getElementById('acum-sesiones-granularity').querySelectorAll('button').forEach(b=>{
+    b.style.background=b===btn?'var(--verde)':'#fff';
+    b.style.color=b===btn?'#fff':'var(--verde)';
+  });
+  acumRenderSesionesChart(acumDiasActuales);
+}
+const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 function acumRenderSesionesChart(dias){
-  const labels=dias.map(id=>fechaLabel(ACUM_DAILY[id].fecha));
-  const sesionesArr=dias.map(id=>ACUM_DAILY[id].sesiones);
-  const participantesArr=dias.map(id=>ACUM_DAILY[id].participantes);
+  acumDiasActuales=dias;
+  let labels,sesionesArr,participantesArr;
+  if(acumGranularity==='mes'){
+    const mesMap={};
+    for(const id of dias){
+      const d=ACUM_DAILY[id];
+      const m=d.fecha.slice(0,7); // 'YYYY-MM'
+      if(!mesMap[m]) mesMap[m]={sesiones:0,participantes:0};
+      mesMap[m].sesiones+=d.sesiones;
+      mesMap[m].participantes+=d.participantes;
+    }
+    const meses=Object.keys(mesMap).sort();
+    labels=meses.map(m=>{const[y,mo]=m.split('-');return MESES_ES[parseInt(mo,10)-1]+' '+y;});
+    sesionesArr=meses.map(m=>mesMap[m].sesiones);
+    participantesArr=meses.map(m=>mesMap[m].participantes);
+  } else {
+    labels=dias.map(id=>fechaLabel(ACUM_DAILY[id].fecha));
+    sesionesArr=dias.map(id=>ACUM_DAILY[id].sesiones);
+    participantesArr=dias.map(id=>ACUM_DAILY[id].participantes);
+  }
   if(acumChartSesiones){
     acumChartSesiones.data.labels=labels;
     acumChartSesiones.data.datasets[0].data=sesionesArr;
