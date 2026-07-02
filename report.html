@@ -122,6 +122,7 @@ td{padding:9px 10px;font-size:13px;}
     <button class="main-tab" onclick="showMain('diario',this)">&#128197; Detalle diario</button>
     <button class="main-tab" onclick="showMain('evolucion',this)">&#128200; Evolucion de KPIs</button>
     <button class="main-tab" onclick="showMain('dutyfree',this)">&#128722; Duty Free</button>
+    <button class="main-tab" onclick="showMain('gastronomia',this)">&#127869; Gastronomía</button>
     <button class="main-tab" onclick="showMain('push',this)">&#128241; Push</button>
   </div>
 
@@ -2098,6 +2099,50 @@ td{padding:9px 10px;font-size:13px;}
     </div>
   </div>
 
+  <div class="main-panel" id="panel-gastronomia">
+    <div class="card" style="margin-bottom:16px;padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto">
+      <span style="font-weight:600;font-size:12px;color:var(--gris)">&#128197; Rango:</span>
+      <label style="font-size:12px;color:var(--gris);display:flex;align-items:center;gap:4px">Desde <input type="date" id="gastro-fecha-desde" style="padding:2px 6px;border:1px solid #ccc;border-radius:5px;font-size:12px"></label>
+      <label style="font-size:12px;color:var(--gris);display:flex;align-items:center;gap:4px">Hasta <input type="date" id="gastro-fecha-hasta" style="padding:2px 6px;border:1px solid #ccc;border-radius:5px;font-size:12px"></label>
+      <button onclick="gastroAplicarFiltro()" style="padding:4px 10px;border:none;border-radius:5px;background:var(--verde);color:#fff;font-size:12px;font-weight:600;cursor:pointer">Aplicar</button>
+      <button onclick="gastroLimpiarFiltro()" style="padding:4px 10px;border:1px solid #ccc;border-radius:5px;background:#fff;color:var(--gris);font-size:12px;cursor:pointer">Ver todo</button>
+      <span id="gastro-filtro-rango" style="font-size:11px;color:var(--gris);margin-left:8px"></span>
+    </div>
+    <div class="kpi-row" style="margin-bottom:20px">
+      <div class="kpi-small"><div class="kpi-small-value" id="gastro-kpi-promos">—</div><div class="kpi-small-label">Promos gastro entregadas</div></div>
+      <div class="kpi-small"><div class="kpi-small-value" id="gastro-kpi-canjes">—</div><div class="kpi-small-label">Canjes registrados</div></div>
+      <div class="kpi-small"><div class="kpi-small-value" id="gastro-kpi-conversion">—</div><div class="kpi-small-label">Conversión (canjes / promos)</div></div>
+      <div class="kpi-small"><div class="kpi-small-value" id="gastro-kpi-bruto">—</div><div class="kpi-small-label">Facturación bruta total</div></div>
+      <div class="kpi-small"><div class="kpi-small-value" id="gastro-kpi-desc">—</div><div class="kpi-small-label">Descuento ADA (20%)</div></div>
+      <div class="kpi-small"><div class="kpi-small-value" id="gastro-kpi-neto">—</div><div class="kpi-small-label">Facturación neta total</div></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">Por local</div>
+        <div class="card-subtitle">Promos entregadas acumuladas vs. canjes en el rango seleccionado</div>
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Local</th><th>Aerop.</th><th class="right">Promos</th><th class="right">Canjes</th><th class="right">Conv.</th><th class="right">Fact. bruta</th><th class="right">Desc. ADA</th><th class="right">Fact. neta</th></tr></thead>
+          <tbody id="gastro-table-locales"></tbody>
+        </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Canjes por día</div>
+        <div class="card-subtitle">Registros de canje por local en el rango</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="canvas-gastro-canjes"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Detalle de canjes</div>
+      <div class="card-subtitle" id="gastro-detalle-sub"></div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Fecha</th><th>Local</th><th>Aerop.</th><th class="right">Fact. bruta</th><th class="right">Desc. ADA</th><th class="right">Fact. neta</th></tr></thead>
+        <tbody id="gastro-table-detalle"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="main-panel" id="panel-push">
     <div class="card" id="push-filtro" style="margin-bottom:16px;padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto">
       <span style="font-weight:600;font-size:12px;color:var(--gris)">&#128197; Rango:</span>
@@ -2155,7 +2200,7 @@ td{padding:9px 10px;font-size:13px;}
 
 </script>
 <script>
-function showMain(id,btn){document.querySelectorAll('.main-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='evolucion')initCharts();if(id==='dutyfree')initDutyFreeChart();if(id==='push')initPushChart();}
+function showMain(id,btn){document.querySelectorAll('.main-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');btn.classList.add('active');if(id==='evolucion')initCharts();if(id==='dutyfree')initDutyFreeChart();if(id==='push')initPushChart();if(id==='gastronomia')initGastroTab();}
 const DF_DATA=[
   {fecha:'2026-06-09', label:'9 jun',  tickets:1,  ventaNeta:62,    ventaBruta:78,    desc:16,   pctDesc:21, promos:3,   cuponesADA:4,   cuponesPenales:0},
   {fecha:'2026-06-10', label:'10 jun', tickets:1,  ventaNeta:9,     ventaBruta:11.5,  desc:2.5,  pctDesc:22, promos:23,  cuponesADA:23,  cuponesPenales:0},
@@ -2355,7 +2400,7 @@ function evolRender(desde,hasta){
   });
   const rangoEl=document.getElementById('evol-filtro-rango');
   if(idx.length===LABELS.length){
-    rangoEl.textContent='Mostrando todo el periodo (8 al 25 jun 2026)';
+    rangoEl.textContent='';
   } else if(!idx.length){
     rangoEl.textContent='No hay datos para el rango seleccionado';
   } else {
@@ -2688,7 +2733,8 @@ function acumRenderBarList(elId,mapa,unidad){
   }).join('');
   return total;
 }
-function fechaLabel(f){ return parseInt(f.slice(8,10),10)+' jun'; }
+const _MESES_CORTO=['','ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fechaLabel(f){ return parseInt(f.slice(8,10),10)+' '+_MESES_CORTO[parseInt(f.slice(5,7),10)]; }
 let acumChartSesiones=null;
 let acumGranularity='dia';
 let acumDiasActuales=[];
@@ -2772,7 +2818,7 @@ function renderAcumulado(desde,hasta){
 
   const rangoEl=document.getElementById('acum-filtro-rango');
   if(dias.length===Object.keys(ACUM_DAILY).length){
-    rangoEl.textContent='Mostrando todo el período (8 al 25 jun 2026)';
+    rangoEl.textContent='';
   } else if(!dias.length){
     rangoEl.textContent='No hay datos para el rango seleccionado';
   } else {
@@ -2927,6 +2973,127 @@ function initPushChart(){
   document.getElementById('push-fecha-desde').value='2026-06-20';
   document.getElementById('push-fecha-hasta').value='2026-07-01';
   pushRender('2026-06-20','2026-07-01');
+}
+
+/* ============================================================
+   GASTRONOMIA
+   ============================================================ */
+const GASTRO_CANJES=[
+  {fecha:'2026-06-13',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:35702.50,descADA:7140.50,tktNeto:28562.00},
+  {fecha:'2026-06-13',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:19090.90,descADA:3818.18,tktNeto:15272.72},
+  {fecha:'2026-06-16',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:34297.50,descADA:6859.50,tktNeto:27438.00},
+  {fecha:'2026-06-18',aeropuerto:'AEP',local:'La Cabrera',       tktBruto:41322.30,descADA:8264.46,tktNeto:33057.84},
+  {fecha:'2026-06-19',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:41322.30,descADA:8264.46,tktNeto:33057.84},
+  {fecha:'2026-06-21',aeropuerto:'AEP',local:'Hard Rock',        tktBruto: 9090.90,descADA:1818.18,tktNeto: 7272.72},
+  {fecha:'2026-06-22',aeropuerto:'AEP',local:'La Cabrera',       tktBruto: 3057.85,descADA: 611.57,tktNeto: 2446.28},
+  {fecha:'2026-06-22',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:22314.05,descADA:4462.81,tktNeto:17851.24},
+  {fecha:'2026-06-24',aeropuerto:'AEP',local:'La Cabrera',       tktBruto: 8677.70,descADA:1735.54,tktNeto: 6942.16},
+  {fecha:'2026-06-26',aeropuerto:'AEP',local:'Hard Rock',        tktBruto: 4545.45,descADA: 909.09,tktNeto: 3636.36},
+  {fecha:'2026-06-26',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:27685.95,descADA:5537.19,tktNeto:22148.76},
+  {fecha:'2026-06-27',aeropuerto:'AEP',local:'La Cabrera',       tktBruto:12396.70,descADA:2479.34,tktNeto: 9917.36},
+  {fecha:'2026-06-29',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:14876.05,descADA:2975.21,tktNeto:11900.84},
+  {fecha:'2026-06-30',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:25041.30,descADA:5008.26,tktNeto:20033.04},
+  {fecha:'2026-07-01',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:35289.25,descADA:7057.85,tktNeto:28231.40},
+  {fecha:'2026-07-02',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:13553.70,descADA:2710.74,tktNeto:10842.96},
+  {fecha:'2026-07-03',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:11404.95,descADA:2280.99,tktNeto: 9123.96},
+  {fecha:'2026-07-04',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:21157.00,descADA:4231.40,tktNeto:16925.60},
+  {fecha:'2026-07-05',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:15619.85,descADA:3123.97,tktNeto:12495.88},
+];
+const GASTRO_LOCALS_CFG={
+  'Le Pain Quotidien':{aeropuerto:'AEP',promoField:'promosAEP',promoKeys:['Le Pain Quotidien'],color:'#7c3aed'},
+  'Hard Rock':        {aeropuerto:'AEP',promoField:'promosAEP',promoKeys:['Hard Rock'],         color:'#b45309'},
+  'La Cabrera':       {aeropuerto:'AEP',promoField:'promosAEP',promoKeys:['La Cabrera','La Cabrera Express'],color:'#007381'},
+};
+function gastroFmt(v){return '$'+Math.round(v).toLocaleString('es-AR');}
+function gastroPromosEntregadas(local){
+  const cfg=GASTRO_LOCALS_CFG[local]; if(!cfg) return 0;
+  return Object.values(ACUM_DAILY).reduce((sum,d)=>{
+    const m=d[cfg.promoField]||{};
+    return sum+cfg.promoKeys.reduce((s,k)=>s+(m[k]||0),0);
+  },0);
+}
+let gastroChart=null;
+let gastroTabInit=false;
+function gastroRender(desde,hasta){
+  const canjes=GASTRO_CANJES.filter(d=>(!desde||d.fecha>=desde)&&(!hasta||d.fecha<=hasta));
+  const totalBruto=canjes.reduce((s,d)=>s+d.tktBruto,0);
+  const totalDesc=canjes.reduce((s,d)=>s+d.descADA,0);
+  const totalNeto=canjes.reduce((s,d)=>s+d.tktNeto,0);
+  const locales=Object.keys(GASTRO_LOCALS_CFG);
+  const totalPromos=locales.reduce((s,l)=>s+gastroPromosEntregadas(l),0);
+  const totalCanjes=canjes.length;
+  const conv=totalPromos?totalCanjes/totalPromos*100:0;
+  document.getElementById('gastro-kpi-promos').textContent=totalPromos.toLocaleString('es-AR');
+  document.getElementById('gastro-kpi-canjes').textContent=totalCanjes;
+  document.getElementById('gastro-kpi-conversion').textContent=conv.toFixed(1).replace('.',',')+' %';
+  document.getElementById('gastro-kpi-bruto').textContent=gastroFmt(totalBruto);
+  document.getElementById('gastro-kpi-desc').textContent=gastroFmt(totalDesc);
+  document.getElementById('gastro-kpi-neto').textContent=gastroFmt(totalNeto);
+  // per-local table
+  let tbody='';
+  locales.forEach(local=>{
+    const cfg=GASTRO_LOCALS_CFG[local];
+    const lc=canjes.filter(d=>d.local===local);
+    const promos=gastroPromosEntregadas(local);
+    const lconv=promos?lc.length/promos*100:0;
+    const lb=lc.reduce((s,d)=>s+d.tktBruto,0);
+    const ld=lc.reduce((s,d)=>s+d.descADA,0);
+    const ln=lc.reduce((s,d)=>s+d.tktNeto,0);
+    tbody+=`<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cfg.color};margin-right:6px;vertical-align:middle"></span>${local}</td><td>${cfg.aeropuerto}</td><td class="right">${promos}</td><td class="right">${lc.length}</td><td class="right">${lconv.toFixed(1).replace('.',',')}%</td><td class="right">${gastroFmt(lb)}</td><td class="right">${gastroFmt(ld)}</td><td class="right">${gastroFmt(ln)}</td></tr>`;
+  });
+  tbody+=`<tr style="border-top:2px solid var(--verde);font-weight:600"><td colspan="2">Total</td><td class="right">${totalPromos}</td><td class="right">${totalCanjes}</td><td class="right">${conv.toFixed(1).replace('.',',')}%</td><td class="right">${gastroFmt(totalBruto)}</td><td class="right">${gastroFmt(totalDesc)}</td><td class="right">${gastroFmt(totalNeto)}</td></tr>`;
+  document.getElementById('gastro-table-locales').innerHTML=tbody;
+  // detail table
+  let dtbody='';
+  [...canjes].sort((a,b)=>a.fecha<b.fecha?-1:1).forEach(d=>{
+    dtbody+=`<tr><td>${fechaLabel(d.fecha)}</td><td>${d.local}</td><td>${d.aeropuerto}</td><td class="right">${gastroFmt(d.tktBruto)}</td><td class="right">${gastroFmt(d.descADA)}</td><td class="right">${gastroFmt(d.tktNeto)}</td></tr>`;
+  });
+  const dtotal=`<tr style="border-top:2px solid var(--verde);font-weight:600"><td colspan="3">Total (${canjes.length} canjes)</td><td class="right">${gastroFmt(totalBruto)}</td><td class="right">${gastroFmt(totalDesc)}</td><td class="right">${gastroFmt(totalNeto)}</td></tr>`;
+  document.getElementById('gastro-table-detalle').innerHTML=dtbody+dtotal;
+  // rango label
+  const rangoEl=document.getElementById('gastro-filtro-rango');
+  rangoEl.textContent=canjes.length===GASTRO_CANJES.length?'':'Mostrando '+canjes.length+' de '+GASTRO_CANJES.length+' canjes';
+  // chart: canjes por dia stacked by local
+  const diasSet=new Set(canjes.map(d=>d.fecha));
+  const dias=[...diasSet].sort();
+  const chartLabels=dias.map(f=>fechaLabel(f));
+  const datasets=locales.map(local=>({
+    label:local,
+    data:dias.map(f=>canjes.filter(d=>d.fecha===f&&d.local===local).length),
+    backgroundColor:GASTRO_LOCALS_CFG[local].color,
+    borderRadius:4,
+    stack:'s',
+  }));
+  if(gastroChart){
+    gastroChart.data.labels=chartLabels;
+    gastroChart.data.datasets=datasets;
+    gastroChart.update();
+  } else {
+    const ctx=document.getElementById('canvas-gastro-canjes');
+    if(ctx) gastroChart=new Chart(ctx,{type:'bar',data:{labels:chartLabels,datasets},options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Open Sans',size:11}}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y} canje${c.parsed.y!==1?'s':''}`}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{family:'Open Sans',size:11},color:'#73787B'}},
+        y:{stacked:true,beginAtZero:true,grid:{color:'#f0f1f2'},ticks:{stepSize:1,font:{family:'Open Sans',size:11},color:'#73787B'}},
+      }
+    }});
+  }
+}
+function gastroAplicarFiltro(){gastroRender(document.getElementById('gastro-fecha-desde').value,document.getElementById('gastro-fecha-hasta').value);}
+function gastroLimpiarFiltro(){
+  document.getElementById('gastro-fecha-desde').value='2026-06-13';
+  document.getElementById('gastro-fecha-hasta').value='2026-07-05';
+  gastroRender('2026-06-13','2026-07-05');
+}
+function initGastroTab(){
+  if(gastroTabInit)return; gastroTabInit=true;
+  document.getElementById('gastro-fecha-desde').min=document.getElementById('gastro-fecha-hasta').min='2026-06-13';
+  document.getElementById('gastro-fecha-desde').max=document.getElementById('gastro-fecha-hasta').max='2026-07-05';
+  document.getElementById('gastro-fecha-desde').value='2026-06-13';
+  document.getElementById('gastro-fecha-hasta').value='2026-07-05';
+  gastroRender('2026-06-13','2026-07-05');
 }
 </script>
 </body>
