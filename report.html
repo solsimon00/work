@@ -2983,21 +2983,21 @@ const GASTRO_CANJES=[
   {fecha:'2026-06-13',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:19090.90,descADA:3818.18,tktNeto:15272.72},
   {fecha:'2026-06-16',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:34297.50,descADA:6859.50,tktNeto:27438.00},
   {fecha:'2026-06-18',aeropuerto:'AEP',local:'La Cabrera',       tktBruto:41322.30,descADA:8264.46,tktNeto:33057.84},
+  {fecha:'2026-06-19',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:25041.30,descADA:5008.26,tktNeto:20033.04},
   {fecha:'2026-06-19',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:41322.30,descADA:8264.46,tktNeto:33057.84},
+  {fecha:'2026-06-20',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:35289.25,descADA:7057.85,tktNeto:28231.40},
   {fecha:'2026-06-21',aeropuerto:'AEP',local:'Hard Rock',        tktBruto: 9090.90,descADA:1818.18,tktNeto: 7272.72},
   {fecha:'2026-06-22',aeropuerto:'AEP',local:'La Cabrera',       tktBruto: 3057.85,descADA: 611.57,tktNeto: 2446.28},
   {fecha:'2026-06-22',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:22314.05,descADA:4462.81,tktNeto:17851.24},
+  {fecha:'2026-06-23',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:13553.70,descADA:2710.74,tktNeto:10842.96},
   {fecha:'2026-06-24',aeropuerto:'AEP',local:'La Cabrera',       tktBruto: 8677.70,descADA:1735.54,tktNeto: 6942.16},
   {fecha:'2026-06-26',aeropuerto:'AEP',local:'Hard Rock',        tktBruto: 4545.45,descADA: 909.09,tktNeto: 3636.36},
   {fecha:'2026-06-26',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:27685.95,descADA:5537.19,tktNeto:22148.76},
   {fecha:'2026-06-27',aeropuerto:'AEP',local:'La Cabrera',       tktBruto:12396.70,descADA:2479.34,tktNeto: 9917.36},
+  {fecha:'2026-06-29',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:11404.95,descADA:2280.99,tktNeto: 9123.96},
+  {fecha:'2026-06-29',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:21157.00,descADA:4231.40,tktNeto:16925.60},
+  {fecha:'2026-06-29',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:15619.85,descADA:3123.97,tktNeto:12495.88},
   {fecha:'2026-06-29',aeropuerto:'AEP',local:'Hard Rock',        tktBruto:14876.05,descADA:2975.21,tktNeto:11900.84},
-  {fecha:'2026-06-30',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:25041.30,descADA:5008.26,tktNeto:20033.04},
-  {fecha:'2026-07-01',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:35289.25,descADA:7057.85,tktNeto:28231.40},
-  {fecha:'2026-07-02',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:13553.70,descADA:2710.74,tktNeto:10842.96},
-  {fecha:'2026-07-03',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:11404.95,descADA:2280.99,tktNeto: 9123.96},
-  {fecha:'2026-07-04',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:21157.00,descADA:4231.40,tktNeto:16925.60},
-  {fecha:'2026-07-05',aeropuerto:'AEP',local:'Le Pain Quotidien',tktBruto:15619.85,descADA:3123.97,tktNeto:12495.88},
 ];
 const GASTRO_LOCALS_CFG={
   'Le Pain Quotidien':{aeropuerto:'AEP',promoField:'promosAEP',promoKeys:['Le Pain Quotidien'],color:'#7c3aed'},
@@ -3084,16 +3084,16 @@ function gastroRender(desde,hasta){
 function gastroAplicarFiltro(){gastroRender(document.getElementById('gastro-fecha-desde').value,document.getElementById('gastro-fecha-hasta').value);}
 function gastroLimpiarFiltro(){
   document.getElementById('gastro-fecha-desde').value='2026-06-13';
-  document.getElementById('gastro-fecha-hasta').value='2026-07-05';
-  gastroRender('2026-06-13','2026-07-05');
+  document.getElementById('gastro-fecha-hasta').value='2026-06-29';
+  gastroRender('2026-06-13','2026-06-29');
 }
 function initGastroTab(){
   if(gastroTabInit)return; gastroTabInit=true;
   document.getElementById('gastro-fecha-desde').min=document.getElementById('gastro-fecha-hasta').min='2026-06-13';
-  document.getElementById('gastro-fecha-desde').max=document.getElementById('gastro-fecha-hasta').max='2026-07-05';
+  document.getElementById('gastro-fecha-desde').max=document.getElementById('gastro-fecha-hasta').max='2026-06-29';
   document.getElementById('gastro-fecha-desde').value='2026-06-13';
-  document.getElementById('gastro-fecha-hasta').value='2026-07-05';
-  gastroRender('2026-06-13','2026-07-05');
+  document.getElementById('gastro-fecha-hasta').value='2026-06-29';
+  gastroRender('2026-06-13','2026-06-29');
 }
 </script>
 </body>
