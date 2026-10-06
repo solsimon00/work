@@ -195,7 +195,7 @@
     {
       "id": "yoy-todos-pagos",
       "emisor": "YOY",
-      "titulo": "20% en tus primeras 4 compras con MODO",
+      "titulo": "20% en tus primeras 4 compras con MODO (incluye servicios)",
       "medios": [
         "yoy_debito",
         "yoy_cuenta"
@@ -218,7 +218,7 @@
       "canal": "QR MODO",
       "desde": "2026-09-18",
       "hasta": "2026-10-15",
-      "condiciones": "Cualquier comercio. Tope de $4.000 por compra y $16.000 en total (4 compras).",
+      "condiciones": "Cualquier pago que acepte QR MODO, incluidos servicios. Tope $4.000 por compra y $16.000 en total (4 compras). Conviene usarla en pagos de $20.000 o más.",
       "fuente": "https://www.modo.com.ar/promos/20-yoy-todoslospagos-ltc-sep26",
       "verificado": true
     },
@@ -445,7 +445,7 @@
     {
       "id": "ppay-personal-flow",
       "emisor": "Personal Pay",
-      "titulo": "10% en la factura de Personal / Flow",
+      "titulo": "25% en la factura de internet de Personal",
       "medios": [
         "ppay_debito",
         "ppay_cuenta"
@@ -463,14 +463,14 @@
         5,
         6
       ],
-      "porcentaje": 10,
-      "tope": 750,
+      "porcentaje": 25,
+      "tope": 7000,
       "topePeriodo": "mes",
       "minimo": 0,
-      "canal": "Pago desde la app Personal Pay o débito automático",
+      "canal": "Pago de la factura desde Personal Pay",
       "desde": "2026-10-01",
       "hasta": "2026-10-31",
-      "condiciones": "Requiere nivel 1 de Personal Pay. Una vez por mes, tope $750.",
+      "condiciones": "Dato que el usuario vio en su app (depende del nivel de Personal Pay). El sitio público muestra 10% con tope $750 para el nivel 1.",
       "fuente": "https://www.personalpay.com.ar/beneficios",
       "verificado": true
     },
@@ -529,6 +529,90 @@
       "condiciones": "Comercios adheridos de la Provincia de Buenos Aires. El tope se alcanza con $30.000.",
       "fuente": "https://www.canal26.com/economia/2026/10/01/una-por-una-las-promociones-de-cuenta-dni-en-octubre-hasta-40-de-descuento-en-supermercados-gastronomia-farmacias-y-mas/",
       "verificado": true
+    },
+    {
+      "id": "san-amex-pya-market",
+      "emisor": "Santander",
+      "titulo": "Sorpresa Amex: 30% en PedidosYa Market",
+      "medios": [
+        "san_amex"
+      ],
+      "rubro": "delivery",
+      "comercios": [
+        "PedidosYa Market",
+        "PedidosYa"
+      ],
+      "dias": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "porcentaje": 30,
+      "tope": null,
+      "topePeriodo": null,
+      "minimo": 0,
+      "canal": "Amex Santander en la app PedidosYa",
+      "desde": "2026-10-01",
+      "hasta": "2026-10-31",
+      "condiciones": "Programa Sorpresa Santander. Solo pedidos de PedidosYa Market (súper), no restaurantes. Falta confirmar días y tope.",
+      "fuente": "https://www.santander.com.ar/personas/beneficios",
+      "verificado": false
+    },
+    {
+      "id": "brubank-coto-jueves",
+      "emisor": "Brubank",
+      "titulo": "30% en Coto los jueves con Visa Débito NFC, sin tope",
+      "medios": [
+        "brubank_debito"
+      ],
+      "rubro": "supermercado",
+      "comercios": [
+        "Coto"
+      ],
+      "dias": [
+        4
+      ],
+      "porcentaje": 30,
+      "tope": null,
+      "topePeriodo": null,
+      "minimo": 0,
+      "canal": "Visa Débito Brubank sin contacto (Google Pay / Apple Pay)",
+      "desde": "2026-02-26",
+      "hasta": "2026-10-25",
+      "condiciones": "Descuento en caja, sucursales físicas. No vale con QR. Excluye carnes, pollo, aceites, harinas, azúcar, Coca-Cola y otros.",
+      "fuente": "https://help.brubank.com/es/articles/13977196-30-de-descuento-los-jueves-en-supermercados-coto",
+      "verificado": true
+    },
+    {
+      "id": "visa-nfc-coto-jueves",
+      "emisor": "Visa",
+      "titulo": "30% en Coto los jueves con Visa Débito NFC",
+      "medios": [
+        "san_visa_debito",
+        "yoy_debito",
+        "ppay_debito"
+      ],
+      "rubro": "supermercado",
+      "comercios": [
+        "Coto"
+      ],
+      "dias": [
+        4
+      ],
+      "porcentaje": 30,
+      "tope": null,
+      "topePeriodo": null,
+      "minimo": 0,
+      "canal": "Visa Débito sin contacto (Google Pay, Apple Pay, MODO Contactless o NFC de Personal Pay)",
+      "desde": "2026-02-26",
+      "hasta": "2026-10-25",
+      "condiciones": "Promo de Visa para varios emisores. Brubank la informa hasta el 25/10, pero en Naranja X figuraba hasta el 4/10 (por eso no se incluye Naranja X). Confirmá en tu app.",
+      "fuente": "https://help.brubank.com/es/articles/13977196-30-de-descuento-los-jueves-en-supermercados-coto",
+      "verificado": false
     }
   ]
 }

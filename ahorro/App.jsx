@@ -19,7 +19,7 @@ const RUBROS = [
 
 const COMERCIOS_SUGERIDOS = {
   supermercado: ["Día", "Carrefour", "Coto", "ChangoMás"],
-  delivery: ["PedidosYa"],
+  delivery: ["PedidosYa", "PedidosYa Market"],
   gastronomia: [],
   servicios: ["Edenor", "Metrogas", "AGIP", "Personal", "Expensas"],
   cercania: [],

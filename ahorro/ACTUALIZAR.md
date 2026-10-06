@@ -4,7 +4,7 @@ Objetivo: dejar `ahorro/promos.json` con las promos **vigentes** para los medios
 
 ## Qué buscar
 
-Por cada emisor (Santander Select, Galicia Éminent, Naranja X, YOY, Personal Pay, Buepp, Cuenta DNI, Mercado Pago, MODO), buscá promos del mes en curso y del siguiente para estos rubros:
+Por cada emisor (Santander Select, Galicia Éminent, Naranja X, YOY, Personal Pay, Buepp, Cuenta DNI, Brubank (plan básico), Mercado Pago, MODO), buscá promos del mes en curso y del siguiente para estos rubros:
 
 - `supermercado`: Día, Carrefour (y cualquier otra cadena con descuento fuerte)
 - `delivery`: PedidosYa
@@ -28,6 +28,7 @@ WebFetch puede estar bloqueado aunque el contenedor tenga red: usá `curl` (con 
 2. **Personal Pay**: renderizá `https://www.personalpay.com.ar/beneficios` con Playwright y capturá las respuestas JSON. Cada beneficio trae `name`, `days`, `dueDate`, `paymentMethods` y `levels[]` (con `discountValue`, `limitAmount`, `usageLimit` y `paymentMin`).
 3. **Naranja X**: `https://www.naranjax.com/promociones-amba` (renderizada). Los términos y condiciones del final traen topes y vigencias exactos. Ojo: algunas promos piden el Plan Turbo o la tarjeta de crédito Naranja X, y el usuario tiene **plan básico, débito y dinero en cuenta**.
 4. **Galicia y Cuenta DNI**: notas de calcularsueldo.com.ar ("SUPERMERCADOS: Todos los descuentos con Banco Galicia en <mes> <año>", "Cuenta DNI en supermercados…") con curl. También el buscador de beneficios de Banco Provincia.
+4b. **Brubank**: `https://help.brubank.com/es/collections/3832828-promociones-disponibles` con curl. Cada artículo trae el detalle y la vigencia. El usuario tiene el **plan básico**, así que no cargues las promos del plan Ultra.
 5. **WebSearch** (modo `extended`) para lo que falte: Mercado Pago (su sitio devuelve 403), Santander Amex y Galicia Éminent.
 
 ## Formato de cada promo
@@ -62,3 +63,7 @@ WebFetch puede estar bloqueado aunque el contenedor tenga red: usá `curl` (con 
 4. Actualizá `actualizado` con la fecha de hoy.
 5. Validá el JSON y que `npm run build` compile.
 6. Hacé commit con el mensaje `Actualiza promos <fecha>` y un resumen de altas, bajas y cambios.
+
+## Datos que informó el usuario
+
+Las promos cuya `condiciones` diga "Dato que el usuario vio en su app" las informó el usuario. No las pises con datos públicos distintos: si ves algo diferente, dejá su dato y avisá la diferencia en el resumen.
