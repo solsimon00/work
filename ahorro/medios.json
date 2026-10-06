@@ -1,0 +1,16 @@
+[
+  { "id": "san_visa_credito", "emisor": "Santander", "nombre": "Santander Select · Visa Crédito" },
+  { "id": "san_visa_debito",  "emisor": "Santander", "nombre": "Santander Select · Visa Débito" },
+  { "id": "san_amex",         "emisor": "Santander", "nombre": "Santander Select · Amex" },
+  { "id": "gal_visa_credito", "emisor": "Galicia",   "nombre": "Galicia Éminent · Visa Crédito" },
+  { "id": "gal_master_credito","emisor": "Galicia",  "nombre": "Galicia Éminent · Mastercard Crédito" },
+  { "id": "nx_debito",        "emisor": "Naranja X", "nombre": "Naranja X · Visa Débito" },
+  { "id": "nx_cuenta",        "emisor": "Naranja X", "nombre": "Naranja X · Dinero en cuenta (QR)" },
+  { "id": "yoy_debito",       "emisor": "YOY",       "nombre": "YOY · Visa Débito" },
+  { "id": "yoy_cuenta",       "emisor": "YOY",       "nombre": "YOY · Dinero en cuenta" },
+  { "id": "ppay_debito",      "emisor": "Personal Pay", "nombre": "Personal Pay · Visa Débito" },
+  { "id": "ppay_cuenta",      "emisor": "Personal Pay", "nombre": "Personal Pay · Dinero en cuenta" },
+  { "id": "buepp",            "emisor": "Buepp",     "nombre": "Buepp (Banco Ciudad) · Dinero en cuenta" },
+  { "id": "cuenta_dni",       "emisor": "Cuenta DNI","nombre": "Cuenta DNI (Banco Provincia) · Dinero en cuenta" },
+  { "id": "mercadopago",      "emisor": "Mercado Pago","nombre": "Mercado Pago · Dinero en cuenta" }
+]

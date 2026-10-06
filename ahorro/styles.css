@@ -1,0 +1,38 @@
+:root {
+  --bg: #f6f7f5; --card: #ffffff; --text: #1c211e; --muted: #5f6763; --line: #dfe3e0;
+  --accent: #0b7a5c; --accent-bg: #e3f3ec; --warn: #a15c00; --warn-bg: #fdf0dc;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121614; --card: #1b201d; --text: #e9eeea; --muted: #9aa49e; --line: #2c332f;
+    --accent: #4fd1a5; --accent-bg: #173a2e; --warn: #f2b45c; --warn-bg: #3a2c16; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { margin: 0 0 4px; font-size: 28px; }
+h2 { font-size: 17px; margin: 24px 0 8px; }
+header p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+nav { display: flex; gap: 8px; }
+nav button { flex: 1; padding: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 10px; font: inherit; cursor: pointer; }
+nav button.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 18px 0; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.form input, .form select { padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text); font: inherit; }
+.ganador { background: var(--accent-bg); border-radius: 14px; padding: 18px; }
+.ganador .etiqueta { font-size: 13px; color: var(--muted); }
+.ganador .medio { font-size: 21px; font-weight: 700; margin: 2px 0; }
+.ganador .monto { font-size: 30px; font-weight: 800; color: var(--accent); }
+.ganador.vacio { background: var(--card); border: 1px solid var(--line); }
+.esperar { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--warn-bg); color: var(--text); }
+.nota { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lista li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.fila { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.ahorro { font-weight: 700; color: var(--accent); white-space: nowrap; }
+.titulo { margin-top: 2px; }
+.titulo a { color: inherit; }
+.detalle { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.detalle span { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.detalle .aviso { color: var(--warn); border-color: var(--warn); }
+.detalle .manual { color: var(--accent); border-color: var(--accent); }
+.otras, .sin { font-size: 13px; color: var(--muted); margin-top: 6px; }
