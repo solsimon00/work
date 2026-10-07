@@ -13,6 +13,7 @@ const RUBROS = [
   { id: "delivery", nombre: "Delivery (PedidosYa)" },
   { id: "gastronomia", nombre: "Salidas a comer" },
   { id: "servicios", nombre: "Servicios e impuestos" },
+  { id: "transporte", nombre: "Uber / Cabify" },
   { id: "cercania", nombre: "Comercios de barrio" },
   { id: "general", nombre: "Otro" },
 ];
@@ -22,6 +23,7 @@ const COMERCIOS_SUGERIDOS = {
   delivery: ["PedidosYa", "PedidosYa Market"],
   gastronomia: [],
   servicios: ["Edenor", "Metrogas", "AGIP", "Personal", "Expensas"],
+  transporte: ["Uber", "Cabify"],
   cercania: [],
   general: [],
 };
@@ -94,6 +96,7 @@ function promosDesdeSheet(text) {
 
 function aplica(p, { rubro, comercio, fecha }) {
   if (p.rubro !== rubro && p.rubro !== "general") return false;
+  if (p.excluyeRubros?.includes(rubro)) return false;
   if (p.desde && fecha < p.desde) return false;
   if (p.hasta && fecha > p.hasta) return false;
   if (!p.dias.includes(diaSemana(fecha))) return false;

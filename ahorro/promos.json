@@ -220,7 +220,11 @@
       "hasta": "2026-10-15",
       "condiciones": "Cualquier pago que acepte QR MODO, incluidos servicios. Tope $4.000 por compra y $16.000 en total (4 compras). Conviene usarla en pagos de $20.000 o más.",
       "fuente": "https://www.modo.com.ar/promos/20-yoy-todoslospagos-ltc-sep26",
-      "verificado": true
+      "verificado": true,
+      "excluyeRubros": [
+        "transporte",
+        "delivery"
+      ]
     },
     {
       "id": "nx-gastro-mie-vie",
@@ -612,6 +616,91 @@
       "hasta": "2026-10-25",
       "condiciones": "Promo de Visa para varios emisores. Brubank la informa hasta el 25/10, pero en Naranja X figuraba hasta el 4/10 (por eso no se incluye Naranja X). Confirmá en tu app.",
       "fuente": "https://help.brubank.com/es/articles/13977196-30-de-descuento-los-jueves-en-supermercados-coto",
+      "verificado": false
+    },
+    {
+      "id": "gal-eminent-uber",
+      "emisor": "Galicia",
+      "titulo": "Éminent: 25% en Uber miércoles y viernes",
+      "medios": [
+        "gal_visa_credito",
+        "gal_master_credito"
+      ],
+      "rubro": "transporte",
+      "comercios": [
+        "Uber"
+      ],
+      "dias": [
+        3,
+        5
+      ],
+      "porcentaje": 25,
+      "tope": 4000,
+      "topePeriodo": "mes",
+      "minimo": 0,
+      "canal": "Tarjeta Galicia cargada en la app de Uber",
+      "desde": "2026-10-01",
+      "hasta": "2026-12-31",
+      "condiciones": "Días y porcentaje confirmados en la API de Galicia. El tope de $4.000 por mes sale de fuentes secundarias: confirmalo en la app.",
+      "fuente": "https://www.galicia.ar/personas/promociones/transporte",
+      "verificado": false
+    },
+    {
+      "id": "gal-eminent-cabify",
+      "emisor": "Galicia",
+      "titulo": "Éminent: 25% en Cabify sábados y domingos",
+      "medios": [
+        "gal_visa_credito",
+        "gal_master_credito"
+      ],
+      "rubro": "transporte",
+      "comercios": [
+        "Cabify"
+      ],
+      "dias": [
+        0,
+        6
+      ],
+      "porcentaje": 25,
+      "tope": 4000,
+      "topePeriodo": "mes",
+      "minimo": 0,
+      "canal": "Tarjeta Galicia cargada en la app de Cabify",
+      "desde": "2026-10-01",
+      "hasta": "2026-12-31",
+      "condiciones": "Días y porcentaje confirmados en la API de Galicia. El tope de $4.000 por mes sale de fuentes secundarias: confirmalo en la app.",
+      "fuente": "https://www.galicia.ar/personas/promociones/transporte",
+      "verificado": false
+    },
+    {
+      "id": "ppay-cabify",
+      "emisor": "Personal Pay",
+      "titulo": "50% en Cabify todos los días",
+      "medios": [
+        "ppay_debito"
+      ],
+      "rubro": "transporte",
+      "comercios": [
+        "Cabify"
+      ],
+      "dias": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "porcentaje": 50,
+      "tope": 3000,
+      "topePeriodo": "compra",
+      "minimo": 0,
+      "canal": "Tarjeta Visa Personal Pay en Cabify + cupón desde la app Personal Pay",
+      "desde": "2026-10-01",
+      "hasta": "2026-12-31",
+      "condiciones": "Hay que activar el cupón en la app de Personal Pay. Tope de $3.000 (Personal Pay no aclara si es por viaje o por mes).",
+      "fuente": "https://www.personalpay.com.ar/beneficios",
       "verificado": false
     }
   ]

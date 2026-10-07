@@ -10,6 +10,7 @@ Por cada emisor (Santander Select, Galicia Éminent, Naranja X, YOY, Personal Pa
 - `delivery`: PedidosYa
 - `gastronomia`: restaurantes y bares
 - `servicios`: Edenor, Metrogas, AGIP (ABL o Patentes), Personal (internet), expensas
+- `transporte`: Uber y Cabify
 - `cercania`: comercios de barrio
 - `general`: promos que valen en cualquier comercio
 
@@ -28,6 +29,7 @@ WebFetch puede estar bloqueado aunque el contenedor tenga red: usá `curl` (con 
 2. **Personal Pay**: renderizá `https://www.personalpay.com.ar/beneficios` con Playwright y capturá las respuestas JSON. Cada beneficio trae `name`, `days`, `dueDate`, `paymentMethods` y `levels[]` (con `discountValue`, `limitAmount`, `usageLimit` y `paymentMin`).
 3. **Naranja X**: `https://www.naranjax.com/promociones-amba` (renderizada). Los términos y condiciones del final traen topes y vigencias exactos. Ojo: algunas promos piden el Plan Turbo o la tarjeta de crédito Naranja X, y el usuario tiene **plan básico, débito y dinero en cuenta**.
 4. **Galicia y Cuenta DNI**: notas de calcularsueldo.com.ar ("SUPERMERCADOS: Todos los descuentos con Banco Galicia en <mes> <año>", "Cuenta DNI en supermercados…") con curl. También el buscador de beneficios de Banco Provincia.
+4a. **Galicia (API oficial)**: `https://loyalty.bff.bancogalicia.com.ar/api/portal/personalizacion/v1/promociones/catalogo?IdCategoria=<id>&page=1&pageSize=50` con curl y los headers `Origin: https://www.galicia.ar` y `Referer: https://www.galicia.ar/`. Las categorías salen de `.../v1/categorias?idAudiencia=1&SubCategoria=false&Visibles=true` (Transportes = 131); también se puede filtrar por marca con `IdsMarca=<id>&TipoPromocion=marca`. Si `eminent: true`, es la promo Éminent (la del usuario). El tope no viene en el listado.
 4b. **Brubank**: `https://help.brubank.com/es/collections/3832828-promociones-disponibles` con curl. Cada artículo trae el detalle y la vigencia. El usuario tiene el **plan básico**, así que no cargues las promos del plan Ultra.
 5. **WebSearch** (modo `extended`) para lo que falte: Mercado Pago (su sitio devuelve 403), Santander Amex y Galicia Éminent.
 
@@ -51,6 +53,7 @@ WebFetch puede estar bloqueado aunque el contenedor tenga red: usá `curl` (con 
   "hasta": "2026-10-31",
   "condiciones": "texto corto",
   "fuente": "https://...",
+  "excluyeRubros": ["transporte"],      // opcional: rubros donde no aplica una promo "general" (p. ej. QR en apps)
   "verificado": true                     // false si algún dato (día, tope o vigencia) es dudoso
 }
 ```
