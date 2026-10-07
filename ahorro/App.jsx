@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import MEDIOS from "./medios.json";
 import DATA from "./promos.json";
+import {
+  RUBROS, COMERCIOS_SUGERIDOS, DIAS, PERIODO, norm, pesos, isoHoy, diaSemana, ranking, proximos7,
+} from "./motor.js";
+import Chat from "./Chat.jsx";
 
 // Planilla de Google Sheets publicada como CSV con promos cargadas a mano (opcional).
 // Columnas: id, emisor, titulo, medios (ids separados por |), rubro, comercios (separados por |),
@@ -8,41 +11,6 @@ import DATA from "./promos.json";
 // Una fila con el mismo id que una promo de promos.json la reemplaza.
 const SHEET_URL = "";
 
-const RUBROS = [
-  { id: "supermercado", nombre: "Supermercado" },
-  { id: "delivery", nombre: "Delivery (PedidosYa)" },
-  { id: "gastronomia", nombre: "Salidas a comer" },
-  { id: "servicios", nombre: "Servicios e impuestos" },
-  { id: "transporte", nombre: "Uber / Cabify" },
-  { id: "cercania", nombre: "Comercios de barrio" },
-  { id: "general", nombre: "Otro" },
-];
-
-const COMERCIOS_SUGERIDOS = {
-  supermercado: ["Día", "Carrefour", "Coto", "ChangoMás"],
-  delivery: ["PedidosYa", "PedidosYa Market"],
-  gastronomia: [],
-  servicios: ["Edenor", "Metrogas", "AGIP", "Personal", "Expensas"],
-  transporte: ["Uber", "Cabify"],
-  cercania: [],
-  general: [],
-};
-
-const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-const PERIODO = { compra: "por compra", dia: "por día", semana: "por semana", mes: "por mes", promo: "en total" };
-
-const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
-const pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
-const isoHoy = () => {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-};
-const diaSemana = iso => new Date(iso + "T12:00:00").getDay();
-const sumarDias = (iso, n) => {
-  const d = new Date(iso + "T12:00:00");
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
-};
 
 function parseCsv(text) {
   const rows = [];
@@ -94,34 +62,6 @@ function promosDesdeSheet(text) {
     }));
 }
 
-function aplica(p, { rubro, comercio, fecha }) {
-  if (p.rubro !== rubro && p.rubro !== "general") return false;
-  if (p.excluyeRubros?.includes(rubro)) return false;
-  if (p.desde && fecha < p.desde) return false;
-  if (p.hasta && fecha > p.hasta) return false;
-  if (!p.dias.includes(diaSemana(fecha))) return false;
-  if (comercio && p.comercios.length && !p.comercios.some(c => norm(c) === norm(comercio))) return false;
-  return true;
-}
-
-function calcular(p, monto) {
-  const bruto = (monto * p.porcentaje) / 100;
-  const faltaMinimo = p.minimo && monto < p.minimo ? p.minimo - monto : 0;
-  const ahorro = faltaMinimo ? 0 : p.tope != null ? Math.min(bruto, p.tope) : bruto;
-  return { ahorro, topeado: p.tope != null && bruto > p.tope, faltaMinimo };
-}
-
-// Para cada medio, la mejor promo aplicable ese día.
-function ranking(promos, consulta) {
-  const monto = Number(consulta.monto) || 0;
-  return MEDIOS.map(m => {
-    const opciones = promos
-      .filter(p => p.medios.includes(m.id) && aplica(p, consulta))
-      .map(p => ({ promo: p, ...calcular(p, monto) }))
-      .sort((a, b) => b.ahorro - a.ahorro);
-    return { medio: m, mejor: opciones[0] || null, otras: opciones.slice(1) };
-  }).sort((a, b) => (b.mejor?.ahorro || 0) - (a.mejor?.ahorro || 0));
-}
 
 function Detalle({ promo }) {
   const p = promo;
@@ -152,13 +92,7 @@ function Consultar({ promos }) {
   const segura = conPromo.find(r => r.mejor.promo.verificado && r.mejor.ahorro > 0);
 
   // ¿Conviene esperar? Mejor ahorro en cada uno de los próximos 7 días.
-  const semana = useMemo(() => {
-    return [...Array(7)].map((_, i) => {
-      const f = sumarDias(fecha, i);
-      const top = ranking(promos, { ...consulta, fecha: f })[0];
-      return { fecha: f, ahorro: top.mejor?.ahorro || 0, medio: top.mejor ? top.medio : null };
-    });
-  }, [promos, rubro, comercio, monto, fecha]);
+  const semana = useMemo(() => proximos7(promos, consulta), [promos, rubro, comercio, monto, fecha]);
   const mejorDia = semana.reduce((a, b) => (b.ahorro > a.ahorro ? b : a), semana[0]);
 
   const sugeridos = useMemo(() => {
@@ -271,7 +205,7 @@ function Calendario({ promos }) {
 }
 
 export default function App() {
-  const [tab, setTab] = useState("consultar");
+  const [tab, setTab] = useState("chat");
   const [manuales, setManuales] = useState([]);
 
   useEffect(() => {
@@ -293,11 +227,14 @@ export default function App() {
         <h1>¿Con qué pago?</h1>
         <p>Promos actualizadas al {DATA.actualizado.split("-").reverse().join("/")}{manuales.length ? ` + ${manuales.length} de tu planilla` : ""}. Antes de pagar, confirmá el tope que te queda en la app de cada banco.</p>
         <nav>
-          <button className={tab === "consultar" ? "on" : ""} onClick={() => setTab("consultar")}>Consultar</button>
-          <button className={tab === "calendario" ? "on" : ""} onClick={() => setTab("calendario")}>Promos por día</button>
+          <button className={tab === "chat" ? "on" : ""} onClick={() => setTab("chat")}>Chat</button>
+          <button className={tab === "consultar" ? "on" : ""} onClick={() => setTab("consultar")}>Calculadora</button>
+          <button className={tab === "calendario" ? "on" : ""} onClick={() => setTab("calendario")}>Por día</button>
         </nav>
       </header>
-      {tab === "consultar" ? <Consultar promos={promos} /> : <Calendario promos={promos} />}
+      <div hidden={tab !== "chat"}><Chat promos={promos} /></div>
+      {tab === "consultar" && <Consultar promos={promos} />}
+      {tab === "calendario" && <Calendario promos={promos} />}
     </main>
   );
 }

@@ -36,3 +36,25 @@ nav button.on { background: var(--accent); border-color: var(--accent); color: #
 .detalle .aviso { color: var(--warn); border-color: var(--warn); }
 .detalle .manual { color: var(--accent); border-color: var(--accent); }
 .otras, .sin { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+/* Chat */
+.chat { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.mensajes { display: flex; flex-direction: column; gap: 10px; }
+.burbuja { max-width: 92%; padding: 10px 14px; border-radius: 14px; }
+.burbuja p { margin: 0 0 6px; }
+.burbuja p:last-child { margin-bottom: 0; }
+.burbuja.yo { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+.burbuja.bot { align-self: flex-start; background: var(--card); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.burbuja .ctx { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.burbuja .verde { color: var(--accent); }
+.burbuja .aviso { color: var(--warn); }
+.burbuja ul { margin: 4px 0 0; padding: 0; list-style: none; }
+.dias li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.dias li:last-child { border-bottom: 0; }
+.dias li.top { font-weight: 700; color: var(--accent); }
+.promos li { padding: 4px 0; font-size: 14px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.chips button { flex: none; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+.entrada { display: flex; gap: 8px; position: sticky; bottom: 0; padding: 8px 0 12px; background: var(--bg); }
+.entrada input { flex: 1; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
+.entrada button { padding: 0 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
