@@ -58,3 +58,35 @@ nav button.on { background: var(--accent); border-color: var(--accent); color: #
 .entrada { display: flex; gap: 8px; position: sticky; bottom: 0; padding: 8px 0 12px; background: var(--bg); }
 .entrada input { flex: 1; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
 .entrada button { padding: 0 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+
+/* Web app: barra inferior, Hoy y Perfil */
+main { padding-bottom: 96px; }
+header.top h1 { font-size: 24px; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 2px;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--line); }
+.tabbar button { flex: 1; max-width: 140px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px;
+  border: 0; border-radius: 10px; background: none; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
+.tabbar button span { font-size: 20px; line-height: 1; }
+.tabbar button.on { color: var(--accent); background: var(--accent-bg); font-weight: 600; }
+.entrada { bottom: calc(64px + env(safe-area-inset-bottom)); }
+h3 { font-size: 15px; margin: 20px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.hoy-head h2 { font-size: 22px; margin: 8px 0 2px; }
+.hoy-head p { margin: 0; color: var(--muted); }
+.lista-promos { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.promo { display: flex; gap: 12px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.promo .pct { flex: none; min-width: 58px; text-align: center; padding: 8px 4px; border-radius: 10px; background: var(--accent-bg); color: var(--accent); font-weight: 800; font-size: 20px; }
+.promo .info { min-width: 0; }
+.promo .usa { font-size: 14px; margin-top: 2px; }
+.manana { margin-top: 18px; padding: 12px 14px; border-radius: 10px; background: var(--warn-bg); }
+.vacio-perfil { text-align: center; padding: 40px 8px; }
+.primario { padding: 12px 18px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.primario.ancho { width: 100%; margin-top: 16px; }
+.secundario { margin-top: 10px; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 10px; background: none; color: var(--accent); font: inherit; cursor: pointer; }
+.bloque { margin-top: 22px; }
+.bloque h2 { margin-bottom: 4px; }
+.grupo { border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; padding: 6px 12px 10px; background: var(--card); }
+.grupo legend { font-weight: 600; padding: 0 4px; }
+.check, .switch { display: flex; gap: 10px; align-items: center; padding: 6px 0; cursor: pointer; }
+.check input, .switch input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+.chips button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.bloque .chips { flex-wrap: wrap; }

@@ -25,12 +25,12 @@ function Encabezado({ c }) {
   );
 }
 
-function Recomendar({ c, promos }) {
-  const res = ranking(promos, c);
+function Recomendar({ c, promos, medios }) {
+  const res = ranking(promos, c, medios);
   const con = res.filter(r => r.mejor && r.mejor.ahorro > 0);
   const bajoMinimo = res.filter(r => r.mejor && r.mejor.faltaMinimo && !con.includes(r));
   const top = con[0];
-  const semana = proximos7(promos, c);
+  const semana = proximos7(promos, c, medios);
   const mejorDia = semana.reduce((a, b) => (b.ahorro > a.ahorro ? b : a), semana[0]);
 
   if (!top) {
@@ -66,7 +66,7 @@ function Recomendar({ c, promos }) {
   if (top.mejor.topeado && p.porcentaje > 0) {
     const cubierto = Math.ceil((p.tope * 100) / p.porcentaje);
     const resto = c.monto - cubierto;
-    const alt = ranking(promos, { ...c, monto: resto }).find(r => r.mejor && r.mejor.ahorro > 0 && emisorDe(r) !== emisorDe(top));
+    const alt = ranking(promos, { ...c, monto: resto }, medios).find(r => r.mejor && r.mejor.ahorro > 0 && emisorDe(r) !== emisorDe(top));
     if (alt) division = { cubierto, resto, alt, total: top.mejor.ahorro + alt.mejor.ahorro };
   }
 
@@ -107,8 +107,8 @@ function Recomendar({ c, promos }) {
   );
 }
 
-function Cuando({ c, promos }) {
-  const semana = proximos7(promos, c);
+function Cuando({ c, promos, medios }) {
+  const semana = proximos7(promos, c, medios);
   const max = Math.max(...semana.map(d => d.ahorro));
   return (
     <>
@@ -126,7 +126,7 @@ function Cuando({ c, promos }) {
   );
 }
 
-function Promos({ c, promos }) {
+function Promos({ c, promos, medios }) {
   const rubros = c.rubro ? [c.rubro] : RUBROS.map(r => r.id);
   const lista = promos
     .filter(p => rubros.some(r => aplica(p, { rubro: r, comercio: c.rubro ? c.comercio : "", fecha: c.fecha })))
@@ -154,20 +154,20 @@ function Ayuda() {
   );
 }
 
-function Respuesta({ c, promos }) {
+function Respuesta({ c, promos, medios }) {
   if (c.intencion === "ayuda") return <Ayuda />;
   if (c.intencion === "noentendi") {
     return <p>No te entendí. Probá con algo como "80 mil en Día el viernes", "Uber mañana" o "¿qué promos hay hoy?".</p>;
   }
-  if (c.intencion === "promos") return <Promos c={c} promos={promos} />;
+  if (c.intencion === "promos") return <Promos c={c} promos={promos} medios={medios} />;
   if (!c.rubro) {
     return <p>¿En qué vas a gastar? Decime un comercio (Día, Carrefour, Uber, PedidosYa…) o un rubro (súper, cena, la luz…).</p>;
   }
-  if (c.intencion === "cuando") return <Cuando c={c} promos={promos} />;
-  return <Recomendar c={c} promos={promos} />;
+  if (c.intencion === "cuando") return <Cuando c={c} promos={promos} medios={medios} />;
+  return <Recomendar c={c} promos={promos} medios={medios} />;
 }
 
-export default function Chat({ promos }) {
+export default function Chat({ promos, medios }) {
   const [mensajes, setMensajes] = useState([{ de: "bot", consulta: { intencion: "ayuda" } }]);
   const [texto, setTexto] = useState("");
   const ultima = useRef(null);
@@ -189,7 +189,7 @@ export default function Chat({ promos }) {
       <div className="mensajes">
         {mensajes.map((m, i) => (
           <div key={i} className={`burbuja ${m.de}`}>
-            {m.de === "yo" ? m.texto : <Respuesta c={m.consulta} promos={promos} />}
+            {m.de === "yo" ? m.texto : <Respuesta c={m.consulta} promos={promos} medios={medios} />}
           </div>
         ))}
         <div ref={fin} />

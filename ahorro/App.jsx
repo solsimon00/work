@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import DATA from "./promos.json";
 import {
-  RUBROS, COMERCIOS_SUGERIDOS, DIAS, PERIODO, norm, pesos, isoHoy, diaSemana, ranking, proximos7,
+  MEDIOS, RUBROS, COMERCIOS_SUGERIDOS, DIAS, PERIODO, norm, pesos, isoHoy, diaSemana, ranking, proximos7,
 } from "./motor.js";
 import Chat from "./Chat.jsx";
+import Hoy from "./Hoy.jsx";
+import Perfil from "./Perfil.jsx";
+import { useCuenta } from "./cuenta.js";
 
 // Planilla de Google Sheets publicada como CSV con promos cargadas a mano (opcional).
 // Columnas: id, emisor, titulo, medios (ids separados por |), rubro, comercios (separados por |),
@@ -80,20 +83,20 @@ function Detalle({ promo }) {
   );
 }
 
-function Consultar({ promos }) {
+function Consultar({ promos, medios }) {
   const [rubro, setRubro] = useState("supermercado");
   const [comercio, setComercio] = useState("");
   const [monto, setMonto] = useState("50000");
   const [fecha, setFecha] = useState(isoHoy());
 
   const consulta = { rubro, comercio, monto, fecha };
-  const res = useMemo(() => ranking(promos, consulta), [promos, rubro, comercio, monto, fecha]);
+  const res = useMemo(() => ranking(promos, consulta, medios), [promos, medios, rubro, comercio, monto, fecha]);
   const conPromo = res.filter(r => r.mejor);
   const sinPromo = res.filter(r => !r.mejor);
   const segura = conPromo.find(r => r.mejor.promo.verificado && r.mejor.ahorro > 0);
 
   // ¿Conviene esperar? Mejor ahorro en cada uno de los próximos 7 días.
-  const semana = useMemo(() => proximos7(promos, consulta), [promos, rubro, comercio, monto, fecha]);
+  const semana = useMemo(() => proximos7(promos, consulta, medios), [promos, medios, rubro, comercio, monto, fecha]);
   const mejorDia = semana.reduce((a, b) => (b.ahorro > a.ahorro ? b : a), semana[0]);
 
   const sugeridos = useMemo(() => {
@@ -167,7 +170,7 @@ function Consultar({ promos }) {
   );
 }
 
-function Calendario({ promos }) {
+function Calendario({ promos, medios }) {
   const [rubro, setRubro] = useState("todos");
   const hoy = isoHoy();
   const vigentes = promos.filter(p => (!p.hasta || p.hasta >= hoy) && (rubro === "todos" || p.rubro === rubro));
@@ -205,9 +208,30 @@ function Calendario({ promos }) {
   );
 }
 
+const PANTALLAS = [
+  { id: "hoy", nombre: "Hoy", icono: "☀️" },
+  { id: "chat", nombre: "Chat", icono: "💬" },
+  { id: "consultar", nombre: "Calcular", icono: "🧮" },
+  { id: "calendario", nombre: "Semana", icono: "📅" },
+  { id: "perfil", nombre: "Perfil", icono: "👤" },
+];
+const pantallaDeHash = () => {
+  const h = window.location.hash.replace("#", "");
+  return PANTALLAS.some(p => p.id === h) ? h : null;
+};
+
 export default function App() {
-  const [tab, setTab] = useState("chat");
+  const cuenta = useCuenta();
+  const { perfil } = cuenta;
+  const [tab, setTab] = useState(() => pantallaDeHash() || (perfil.medios.length ? "hoy" : "perfil"));
   const [manuales, setManuales] = useState([]);
+
+  const irA = id => { setTab(id); window.history.replaceState(null, "", "#" + id); window.scrollTo(0, 0); };
+  useEffect(() => {
+    const h = () => { const t = pantallaDeHash(); if (t) setTab(t); };
+    window.addEventListener("hashchange", h);
+    return () => window.removeEventListener("hashchange", h);
+  }, []);
 
   useEffect(() => {
     if (!SHEET_URL) return;
@@ -222,20 +246,34 @@ export default function App() {
     return [...DATA.promos.filter(p => !ids.has(p.id)), ...manuales];
   }, [manuales]);
 
+  // Solo los medios del perfil; sin perfil cargado, todos (para que la app sirva igual).
+  const medios = useMemo(() => {
+    const mios = MEDIOS.filter(m => perfil.medios.includes(m.id));
+    return mios.length ? mios : MEDIOS;
+  }, [perfil.medios]);
+  const promosPerfil = useMemo(() => {
+    const ids = new Set(medios.map(m => m.id));
+    return promos.filter(p => p.medios.some(id => ids.has(id)));
+  }, [promos, medios]);
+
   return (
     <main>
-      <header>
+      <header className="top">
         <h1>¿Con qué pago?</h1>
-        <p>Promos actualizadas al {DATA.actualizado.split("-").reverse().join("/")}{manuales.length ? ` + ${manuales.length} de tu planilla` : ""}. Antes de pagar, confirmá el tope que te queda en la app de cada banco.</p>
-        <nav>
-          <button className={tab === "chat" ? "on" : ""} onClick={() => setTab("chat")}>Chat</button>
-          <button className={tab === "consultar" ? "on" : ""} onClick={() => setTab("consultar")}>Calculadora</button>
-          <button className={tab === "calendario" ? "on" : ""} onClick={() => setTab("calendario")}>Por día</button>
-        </nav>
+        <p>Promos al {DATA.actualizado.split("-").reverse().join("/")}. Confirmá el tope que te queda en la app de cada banco.</p>
       </header>
-      <div hidden={tab !== "chat"}><Chat promos={promos} /></div>
-      {tab === "consultar" && <Consultar promos={promos} />}
-      {tab === "calendario" && <Calendario promos={promos} />}
+      {tab === "hoy" && <Hoy promos={promosPerfil} medios={medios} perfil={perfil} irA={irA} />}
+      <div hidden={tab !== "chat"}><Chat promos={promosPerfil} medios={medios} /></div>
+      {tab === "consultar" && <Consultar promos={promosPerfil} medios={medios} />}
+      {tab === "calendario" && <Calendario promos={promosPerfil} medios={medios} />}
+      {tab === "perfil" && <Perfil cuenta={cuenta} irA={irA} />}
+      <nav className="tabbar">
+        {PANTALLAS.map(p => (
+          <button key={p.id} className={tab === p.id ? "on" : ""} onClick={() => irA(p.id)} aria-label={p.nombre}>
+            <span aria-hidden="true">{p.icono}</span>{p.nombre}
+          </button>
+        ))}
+      </nav>
     </main>
   );
 }
