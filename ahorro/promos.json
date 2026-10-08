@@ -702,6 +702,57 @@
       "condiciones": "Hay que activar el cupón en la app de Personal Pay. Tope de $3.000 (Personal Pay no aclara si es por viaje o por mes).",
       "fuente": "https://www.personalpay.com.ar/beneficios",
       "verificado": false
+    },
+    {
+      "id": "mp-carrefour-jueves",
+      "emisor": "Mercado Pago",
+      "titulo": "15% en Carrefour los jueves (productos seleccionados)",
+      "medios": [
+        "mercadopago"
+      ],
+      "rubro": "supermercado",
+      "comercios": [
+        "Carrefour"
+      ],
+      "dias": [
+        4
+      ],
+      "porcentaje": 15,
+      "tope": null,
+      "topePeriodo": null,
+      "minimo": 0,
+      "canal": "QR Mercado Pago con dinero en cuenta",
+      "desde": "2026-10-01",
+      "hasta": "2026-10-31",
+      "condiciones": "Dato que el usuario vio en su app. Solo productos seleccionados: el ahorro real depende de cuánto de tu compra entre en la promo. Tope no informado.",
+      "fuente": "https://www.mercadopago.com.ar/promociones",
+      "verificado": true,
+      "parcial": true
+    },
+    {
+      "id": "mp-dia-miercoles",
+      "emisor": "Mercado Pago",
+      "titulo": "15% en Día los miércoles",
+      "medios": [
+        "mercadopago"
+      ],
+      "rubro": "supermercado",
+      "comercios": [
+        "Día"
+      ],
+      "dias": [
+        3
+      ],
+      "porcentaje": 15,
+      "tope": null,
+      "topePeriodo": null,
+      "minimo": 20000,
+      "canal": "QR Mercado Pago con dinero en cuenta",
+      "desde": "2026-10-01",
+      "hasta": "2026-10-31",
+      "condiciones": "Dato que el usuario vio en su app. Compra mínima $20.000. Tope no informado: confirmalo en la app.",
+      "fuente": "https://www.mercadopago.com.ar/promociones",
+      "verificado": true
     }
   ]
 }

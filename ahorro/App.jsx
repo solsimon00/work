@@ -73,6 +73,7 @@ function Detalle({ promo }) {
       {p.canal && <span>{p.canal}</span>}
       {p.comercios.length > 0 && <span>{p.comercios.join(", ")}</span>}
       {p.hasta && <span>hasta {p.hasta.split("-").reverse().join("/")}</span>}
+      {p.parcial && <span className="aviso">solo productos seleccionados</span>}
       {!p.verificado && <span className="aviso">a verificar</span>}
       {p.manual && <span className="manual">de tu planilla</span>}
     </div>

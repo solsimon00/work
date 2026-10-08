@@ -54,6 +54,7 @@ WebFetch puede estar bloqueado aunque el contenedor tenga red: usá `curl` (con 
   "condiciones": "texto corto",
   "fuente": "https://...",
   "excluyeRubros": ["transporte"],      // opcional: rubros donde no aplica una promo "general" (p. ej. QR en apps)
+  "parcial": true,                      // opcional: el descuento vale solo para productos seleccionados
   "verificado": true                     // false si algún dato (día, tope o vigencia) es dudoso
 }
 ```

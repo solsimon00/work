@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { RUBROS, DIAS, PERIODO, pesos, diaSemana, ranking, proximos7, aplica } from "./motor.js";
+import { RUBROS, DIAS, PERIODO, pesos, diaSemana, ranking, proximos7, aplica, calcular } from "./motor.js";
 import { interpretar } from "./interpretar.js";
 
 const EJEMPLOS = [
@@ -51,6 +51,13 @@ function Recomendar({ c, promos }) {
   }
 
   const p = top.mejor.promo;
+  // Promos que no aplican por no llegar al mínimo, pero que darían más ahorro si se llega.
+  const vistas = new Set();
+  const cerca = res
+    .flatMap(r => [r.mejor, ...r.otras].filter(Boolean).map(o => ({ ...o, medio: r.medio })))
+    .filter(o => o.faltaMinimo && calcular(o.promo, o.promo.minimo).ahorro > top.mejor.ahorro)
+    .filter(o => !vistas.has(o.promo.id) && vistas.add(o.promo.id))
+    .slice(0, 2);
   const otras = con.filter(r => emisorDe(r) !== emisorDe(top)).filter((r, i, a) => a.findIndex(x => emisorDe(x) === emisorDe(r)) === i).slice(0, 2);
   const segura = !p.verificado && con.find(r => r.mejor.promo.verificado);
 
@@ -72,6 +79,9 @@ function Recomendar({ c, promos }) {
       <p className="nota">
         {p.titulo} · {tope(p)}{p.minimo > 0 ? ` · mínimo ${pesos(p.minimo)}` : ""}{p.canal ? ` · ${p.canal}` : ""}
       </p>
+      {p.parcial && (
+        <p className="nota aviso">Ojo: aplica solo a productos seleccionados, así que el ahorro real puede ser menor.</p>
+      )}
       {!p.verificado && (
         <p className="nota aviso">
           Esta promo está sin confirmar.{segura ? ` La mejor confirmada: ${segura.medio.nombre} (${pesos(segura.mejor.ahorro)}).` : ""}
@@ -85,6 +95,11 @@ function Recomendar({ c, promos }) {
       {otras.length > 0 && (
         <p className="nota">Otras opciones: {otras.map(r => `${r.medio.nombre} (${pesos(r.mejor.ahorro)})`).join(" · ")}</p>
       )}
+      {cerca.map(o => (
+        <p key={o.promo.id} className="nota">
+          Si llegás a {pesos(o.promo.minimo)} (te faltan {pesos(o.faltaMinimo)}), con {o.medio.nombre} ahorrás {pesos(calcular(o.promo, o.promo.minimo).ahorro)}.
+        </p>
+      ))}
       {mejorDia.ahorro > top.mejor.ahorro && (
         <p>Si podés esperar: el <b>{fechaCorta(mejorDia.fecha)}</b> ahorrás <b>{pesos(mejorDia.ahorro)}</b> con {mejorDia.medio.nombre}.</p>
       )}
