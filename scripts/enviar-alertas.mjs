@@ -1,13 +1,14 @@
 // Envía a cada usuario con alertas activas una notificación push con los descuentos que puede usar hoy.
 // Corre todos los días desde .github/workflows/alertas.yml. Variables de entorno (secrets de GitHub):
-//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (opcional)
+//   FIREBASE_SERVICE_ACCOUNT (JSON de la cuenta de servicio), VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (opcional)
 import webpush from "web-push";
-import { createClient } from "@supabase/supabase-js";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import DATA from "../ahorro/promos.json";
 import { MEDIOS, DIAS, diaSemana, promosDelDia } from "../ahorro/motor.js";
 
-const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY } = process.env;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:alertas@conquepago.app";
+const { FIREBASE_SERVICE_ACCOUNT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY } = process.env;
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:alertas@example.com";
 const PRUEBA = process.argv.includes("--prueba"); // muestra los mensajes sin enviarlos
 
 // Fecha de hoy en Argentina, sin depender del huso horario del runner.
@@ -38,39 +39,34 @@ export function armarMensaje(perfil) {
 }
 
 async function main() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    console.log("Faltan secrets de Supabase o VAPID: no se envían alertas.");
+  if (!FIREBASE_SERVICE_ACCOUNT || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    console.log("Faltan secrets de Firebase o VAPID: no se envían alertas.");
     return;
   }
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-  const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+  initializeApp({ credential: cert(JSON.parse(FIREBASE_SERVICE_ACCOUNT)) });
+  const db = getFirestore();
 
-  const { data: perfiles, error } = await db.from("profiles").select("user_id, medios, rubros").eq("alertas", true);
-  if (error) throw error;
-  const { data: subs, error: e2 } = await db.from("push_subscriptions").select("*").in("user_id", perfiles.map(p => p.user_id));
-  if (e2) throw e2;
-
+  const perfiles = await db.collection("profiles").where("alertas", "==", true).get();
   let enviadas = 0, borradas = 0;
-  for (const perfil of perfiles) {
-    const msg = armarMensaje(perfil);
+  for (const docPerfil of perfiles.docs) {
+    const msg = armarMensaje(docPerfil.data());
     if (!msg) continue;
-    for (const s of subs.filter(x => x.user_id === perfil.user_id)) {
-      if (PRUEBA) { console.log(perfil.user_id, msg); continue; }
+    const subs = await docPerfil.ref.collection("subs").get();
+    for (const s of subs.docs) {
+      const { endpoint, p256dh, auth } = s.data();
+      if (PRUEBA) { console.log(docPerfil.id, msg); continue; }
       try {
-        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(msg));
+        await webpush.sendNotification({ endpoint, keys: { p256dh, auth } }, JSON.stringify(msg));
         enviadas++;
       } catch (err) {
         // 404/410: la suscripción ya no existe (desinstaló la app o revocó el permiso).
-        if (err.statusCode === 404 || err.statusCode === 410) {
-          await db.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
-          borradas++;
-        } else {
-          console.error("Error enviando a", s.endpoint.slice(0, 40), err.statusCode, err.body);
-        }
+        if (err.statusCode === 404 || err.statusCode === 410) { await s.ref.delete(); borradas++; }
+        else console.error("Error enviando a", endpoint.slice(0, 40), err.statusCode, err.body);
       }
     }
   }
-  console.log(`${hoy}: ${perfiles.length} perfiles con alertas, ${enviadas} enviadas, ${borradas} suscripciones vencidas borradas.`);
+  console.log(`${hoy}: ${perfiles.size} perfiles con alertas, ${enviadas} enviadas, ${borradas} suscripciones vencidas borradas.`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

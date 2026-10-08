@@ -90,3 +90,7 @@ h3 { font-size: 15px; margin: 20px 0 8px; color: var(--muted); text-transform: u
 .check input, .switch input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
 .chips button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .bloque .chips { flex-wrap: wrap; }
+.login-mail { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.login-mail input { flex: 1 1 200px; min-width: 0; padding: 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
+.login-mail .secundario { margin-top: 0; }
+.nota.aviso { color: var(--warn); }

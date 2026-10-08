@@ -11,13 +11,13 @@ function Alertas({ cuenta }) {
   if (esIOSSinInstalar()) {
     return <p className="nota">En iPhone, primero agregá la app a la pantalla de inicio: tocá Compartir y después "Agregar a inicio". Abrila desde ahí y activá las alertas.</p>;
   }
-  if (!nube) return <p className="nota">Las alertas se activan cuando la app esté conectada a Supabase.</p>;
-  if (!user) return <p className="nota">Iniciá sesión con Google para recibir alertas.</p>;
+  if (!nube) return <p className="nota">Las alertas se activan cuando la app esté conectada a Firebase.</p>;
+  if (!user) return <p className="nota">Entrá con Google o con tu mail para recibir alertas.</p>;
 
   async function cambiar(on) {
     setOcupado(true); setEstado("");
     try {
-      if (on) await activarPush(user); else await desactivarPush();
+      if (on) await activarPush(user); else await desactivarPush(user);
       setPerfil({ alertas: on });
       setEstado(on ? "Listo: te vamos a avisar a las 8:45 los días que tengas descuentos." : "Alertas desactivadas en este dispositivo.");
     } catch (e) { setEstado(e.message); }
@@ -35,8 +35,46 @@ function Alertas({ cuenta }) {
   );
 }
 
+function Ingreso({ cuenta }) {
+  const { user, loginGoogle, loginMail, logout, error, nube } = cuenta;
+  const [mail, setMail] = useState("");
+  const [enviado, setEnviado] = useState("");
+  const [fallo, setFallo] = useState("");
+
+  if (!nube) return <p className="nota">Tu perfil se guarda en este dispositivo.</p>;
+  if (user) {
+    return (
+      <p className="nota">
+        Conectada como <b>{user.email}</b> · <a href="#perfil" onClick={e => { e.preventDefault(); logout(); }}>Cerrar sesión</a>
+      </p>
+    );
+  }
+
+  async function enviar(e) {
+    e.preventDefault(); setFallo("");
+    try { await loginMail(mail.trim()); setEnviado(mail.trim()); }
+    catch { setFallo("No se pudo mandar el mail. Revisá la dirección."); }
+  }
+
+  return (
+    <>
+      <p className="nota">Entrá para guardar tu perfil y recibir alertas en todos tus dispositivos.</p>
+      <button className="primario ancho" onClick={loginGoogle}>Entrar con Google</button>
+      {enviado ? (
+        <p className="nota">Te mandamos un link a <b>{enviado}</b>. Abrilo desde este dispositivo para entrar (mirá también en spam).</p>
+      ) : (
+        <form className="login-mail" onSubmit={enviar}>
+          <input type="email" required placeholder="o con tu mail: vos@mail.com" value={mail} onChange={e => setMail(e.target.value)} aria-label="Tu mail" />
+          <button type="submit" className="secundario">Mandame el link</button>
+        </form>
+      )}
+      {(fallo || error) && <p className="nota aviso">{fallo || error}</p>}
+    </>
+  );
+}
+
 export default function Perfil({ cuenta, irA }) {
-  const { user, perfil, setPerfil, login, logout, nube } = cuenta;
+  const { perfil, setPerfil } = cuenta;
   const emisores = [...new Set(MEDIOS.map(m => m.emisor))];
   const [instalar, setInstalar] = useState(null);
 
@@ -54,16 +92,7 @@ export default function Perfil({ cuenta, irA }) {
     <>
       <section className="bloque">
         <h2>Tu cuenta</h2>
-        {!nube && <p className="nota">Tu perfil se guarda en este dispositivo.</p>}
-        {nube && !user && (
-          <>
-            <p className="nota">Entrá para guardar tu perfil y recibir alertas en todos tus dispositivos.</p>
-            <button className="primario" onClick={login}>Entrar con Google</button>
-          </>
-        )}
-        {nube && user && (
-          <p className="nota">Conectada como <b>{user.email}</b> · <a href="#perfil" onClick={e => { e.preventDefault(); logout(); }}>Cerrar sesión</a></p>
-        )}
+        <Ingreso cuenta={cuenta} />
       </section>
 
       <section className="bloque">
