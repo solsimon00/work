@@ -46,6 +46,7 @@ h2 { font-size: 15px; margin: 0 0 2px; }
 button, .btn { font: inherit; font-size: 13px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
   padding: 7px 12px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 button:hover, .btn:hover { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: default; border-color: var(--border); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .banner { background: var(--banner-bg); color: var(--banner-text); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; }
 .drop-over::after { content: "Soltá el archivo para cargarlo"; position: fixed; inset: 12px; border: 3px dashed var(--accent); border-radius: 16px;
@@ -118,6 +119,7 @@ footer { color: var(--text-secondary); font-size: 12px; margin-top: 24px; }
     <div class="btns">
       <label class="btn primary" for="fileInput">⬆ Cargar Excel</label>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm" hidden>
+      <button id="btnExport" title="Genera una copia de este HTML con los datos incluidos, para subir a SharePoint">⬇ Exportar HTML con datos</button>
       <button id="btnTemplate" title="Descarga un Excel vacío con la estructura esperada">⬇ Plantilla vacía</button>
       <button id="btnClear" title="Borra los datos guardados en este navegador">Borrar datos</button>
       <button id="btnTheme" title="Cambiar tema">◐ Tema</button>
@@ -244,7 +246,11 @@ footer { color: var(--text-secondary); font-size: 12px; margin-top: 24px; }
   <footer>Los datos se procesan solo en tu navegador: el archivo no se sube a ningún servidor. El último Excel cargado queda guardado en este navegador.</footer>
 </div>
 
+<!-- Datos publicados: los completa el botón "Exportar HTML con datos". No editar a mano. -->
+<script id="datos-embebidos" type="application/json">null</script>
 <script>
+/* Copia del HTML tal como se cargó (antes de dibujar nada), para poder exportarlo con datos */
+const PRISTINE = "<!doctype html>\n" + document.documentElement.outerHTML;
 /* =====================================================================
    CONFIGURACIÓN — si cambian nombres de hojas/columnas o la fecha de
    inicio, editá acá. Los textos se comparan sin tildes ni mayúsculas.
@@ -445,12 +451,20 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
+function revive(s) {
+  s.data.sesiones.days.forEach(d => d.fecha = new Date(d.fecha));
+  if (s.data.resumen?.fin) s.data.resumen.fin = new Date(s.data.resumen.fin);
+  return s;
+}
+// Datos incluidos en el propio HTML (versión publicada), si los hay
+let PUBLISHED = null;
+try { const j = JSON.parse(document.getElementById("datos-embebidos").textContent || "null"); if (j && j.data) PUBLISHED = revive(j); } catch (e) {}
 function loadState() {
+  // Si el HTML trae datos publicados, se muestran esos. Si no, el último Excel cargado en este navegador.
+  if (PUBLISHED) { DATA = PUBLISHED.data; META = { ...PUBLISHED.meta, published: true }; return; }
   try {
     const s = JSON.parse(store.get(CONFIG.storageKey) || "null"); if (!s) return;
-    s.data.sesiones.days.forEach(d => d.fecha = new Date(d.fecha));
-    if (s.data.resumen?.fin) s.data.resumen.fin = new Date(s.data.resumen.fin);
-    DATA = s.data; META = s.meta;
+    revive(s); DATA = s.data; META = s.meta;
   } catch (e) {}
 }
 const hasData = () => !!(DATA.resumen || DATA.sesiones.days.length || DATA.vuelos.length);
@@ -742,7 +756,14 @@ function renderAll() {
   const ok = hasData();
   $("#banner").hidden = ok;
   $("#banner").innerHTML = `Todavía no cargaste datos. Usá <b>Cargar Excel</b> (o arrastrá el archivo a la página). El Excel tiene que tener las hojas <i>Resumen</i>, <i>Sesiones</i> y <i>Por vuelo y destino</i>; si querés, bajá la <b>plantilla vacía</b> como referencia.`;
-  $("#fileInfo").textContent = ok ? `Archivo: ${META.name} · cargado ${META.at}` : "Sin datos cargados · promo desde " + ddmmyyyy(CONFIG.promoStart);
+  $("#fileInfo").textContent = !ok ? "Sin datos cargados · promo desde " + ddmmyyyy(CONFIG.promoStart)
+    : META.published ? `Datos publicados: ${META.name} · actualizado ${META.at}` : `Archivo: ${META.name} · cargado ${META.at}`;
+  if (ok && PUBLISHED && !META.published) {
+    $("#banner").hidden = false;
+    $("#banner").innerHTML = `Estás viendo <b>${esc(META.name)}</b>, cargado solo en tu navegador. Para que lo vean los demás, usá <b>Exportar HTML con datos</b> y reemplazá el archivo en SharePoint. <a href="#" id="backPub">Volver a los datos publicados</a>`;
+    $("#backPub").onclick = e => { e.preventDefault(); loadState(); buildFilters(); renderAll(); };
+  }
+  $("#btnExport").disabled = !ok;
   renderActive();
 }
 function setTab(t) {
@@ -762,7 +783,7 @@ function readFile(file) {
       const data = parseWorkbook(wb);
       DATA = data; META = { name: file.name, at: new Date().toLocaleString("es-AR") };
       if (!hasData()) { DATA = EMPTY; throw new Error("no se encontraron filas con datos en las hojas esperadas."); }
-      store.set(CONFIG.storageKey, JSON.stringify({ meta: META, data: DATA }));
+      if (!PUBLISHED) store.set(CONFIG.storageKey, JSON.stringify({ meta: META, data: DATA }));
       buildFilters(); renderAll();
     } catch (err) { alert("No se pudo leer el archivo: " + err.message + "\n\nRevisá que tenga las 3 hojas con los encabezados de la plantilla."); }
   };
@@ -775,7 +796,19 @@ document.addEventListener("dragover", e => e.preventDefault());
 document.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("drop-over"); } });
 document.addEventListener("drop", e => { e.preventDefault(); dragDepth = 0; document.body.classList.remove("drop-over"); const f = e.dataTransfer?.files?.[0]; if (f) readFile(f); });
 $("#btnTemplate").onclick = () => XLSX.writeFile(templateWorkbook(), "plantilla_promo.xlsx");
-$("#btnClear").onclick = () => { if (!confirm("¿Borrar los datos cargados en este navegador?")) return; store.del(CONFIG.storageKey); DATA = EMPTY; META = {}; buildFilters(); renderAll(); };
+$("#btnExport").onclick = () => {
+  if (!hasData()) return;
+  const meta = { name: META.name, at: META.at };
+  const json = JSON.stringify({ meta, data: DATA }).replace(/</g, "\\u003c");
+  const marker = 'id="datos-embebidos" type="application/json">';
+  const i = PRISTINE.indexOf(marker) + marker.length, j = PRISTINE.indexOf("</" + "script>", i);
+  const html = PRISTINE.slice(0, i) + json + PRISTINE.slice(j);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  a.download = "dashboard_promo.html"; a.click();
+};
+$("#btnClear").onclick = () => { if (!confirm(PUBLISHED ? "¿Descartar el Excel cargado y volver a los datos publicados?" : "¿Borrar los datos cargados en este navegador?")) return;
+  store.del(CONFIG.storageKey); DATA = EMPTY; META = {}; loadState(); buildFilters(); renderAll(); };
 $("#btnTheme").onclick = () => {
   const root = document.documentElement, cur = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   root.dataset.theme = cur === "dark" ? "light" : "dark"; store.set(CONFIG.storageKey + ".theme", root.dataset.theme);
