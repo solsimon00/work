@@ -9,23 +9,12 @@
 <style>
 :root {
   color-scheme: light;
-  --bg: #f5f6f8;
-  --surface-1: #ffffff;
-  --surface-2: #f0f2f5;
-  --border: #e2e5ea;
-  --grid: #eceef1;
-  --text-primary: #191919;
-  --text-secondary: #666666;
-  --accent: #257de0;
-  --series-1: #257de0;  /* AEP */
-  --series-2: #f47230;  /* EZE */
-  --series-3: #00b894;
-  --series-4: #f2a600;
+  --bg: #f5f6f8; --surface-1: #ffffff; --surface-2: #f0f2f5; --border: #e2e5ea; --grid: #eceef1;
+  --text-primary: #191919; --text-secondary: #666666; --accent: #257de0;
+  --series-1: #257de0; --series-2: #f47230; --series-3: #00b894; --series-4: #f2a600;
   --funnel-1: #1b64be; --funnel-2: #338ced; --funnel-3: #6aabf1; --funnel-4: #84b9f3;
-  --good: #0aac23; --good-text: #006c10;
-  --warning: #fbb315; --warning-text: #8a5a00;
-  --critical: #dc3c3d;
-  --banner-bg: #fff6e0; --banner-text: #6b4a00;
+  --good-text: #006c10; --critical: #dc3c3d;
+  --banner-bg: #eaf2fc; --banner-text: #0f4a96;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -34,8 +23,7 @@
     --text-primary: #efefef; --text-secondary: #9c9c9c; --accent: #338ced;
     --series-1: #338ced; --series-2: #e76624; --series-3: #00a888; --series-4: #d28e05;
     --funnel-1: #84b9f3; --funnel-2: #519ced; --funnel-3: #2370cd; --funnel-4: #1757ac;
-    --good-text: #4cc75f; --warning-text: #fbb315;
-    --banner-bg: #2d2412; --banner-text: #f5d58a;
+    --good-text: #4cc75f; --banner-bg: #14243a; --banner-text: #9dc8f7;
   }
 }
 :root[data-theme="dark"] {
@@ -44,56 +32,68 @@
   --text-primary: #efefef; --text-secondary: #9c9c9c; --accent: #338ced;
   --series-1: #338ced; --series-2: #e76624; --series-3: #00a888; --series-4: #d28e05;
   --funnel-1: #84b9f3; --funnel-2: #519ced; --funnel-3: #2370cd; --funnel-4: #1757ac;
-  --good-text: #4cc75f; --warning-text: #fbb315;
-  --banner-bg: #2d2412; --banner-text: #f5d58a;
+  --good-text: #4cc75f; --banner-bg: #14243a; --banner-text: #9dc8f7;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text-primary);
   font: 14px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
 .wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 48px; }
-header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
 .sub { color: var(--text-secondary); font-size: 13px; }
 h2 { font-size: 15px; margin: 0 0 2px; }
-.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 button, .btn { font: inherit; font-size: 13px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);
   padding: 7px 12px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 button:hover, .btn:hover { border-color: var(--accent); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .banner { background: var(--banner-bg); color: var(--banner-text); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; }
-.banner.ok { background: var(--surface-1); color: var(--text-secondary); border: 1px solid var(--border); }
-.drop { border: 2px dashed var(--border); border-radius: 12px; padding: 14px; text-align: center; color: var(--text-secondary); margin-bottom: 14px; background: var(--surface-1); transition: border-color .15s; }
-.drop.over { border-color: var(--accent); color: var(--text-primary); }
+.drop-over::after { content: "Soltá el archivo para cargarlo"; position: fixed; inset: 12px; border: 3px dashed var(--accent); border-radius: 16px;
+  background: color-mix(in srgb, var(--bg) 85%, transparent); display: grid; place-items: center; font-size: 18px; z-index: 50; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+.tab { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 10px 14px; font-weight: 600;
+  color: var(--text-secondary); white-space: nowrap; }
+.tab:hover { color: var(--text-primary); border-color: var(--border); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.panel[hidden] { display: none; }
+
 .filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; background: var(--surface-1); border: 1px solid var(--border);
-  border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; position: sticky; top: 0; z-index: 5; }
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
 .filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-secondary); }
-select, input[type=search] { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--surface-1); color: var(--text-primary); min-width: 140px; }
+select, input[type=search], input[type=date] { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-1); color: var(--text-primary); min-width: 130px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 6px 12px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+
+.periodo { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; margin-bottom: 14px; }
+.periodo .big { font-size: 18px; font-weight: 600; }
 .grid { display: grid; gap: 14px; }
 .kpis { grid-template-columns: repeat(4, 1fr); margin-bottom: 16px; }
-@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.kpis.k6 { grid-template-columns: repeat(6, 1fr); }
+@media (max-width: 900px) { .kpis.k6 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px) { .kpis, .kpis.k6 { grid-template-columns: repeat(2, 1fr); } }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-width: 0; }
 .tile .lbl { font-size: 12px; color: var(--text-secondary); }
 .tile .val { font-size: 24px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.tile .delta { font-size: 12px; margin-top: 2px; color: var(--text-secondary); }
-.delta.up { color: var(--good-text); } .delta.down { color: var(--critical); }
+.tile .note { font-size: 12px; margin-top: 2px; color: var(--text-secondary); }
 .cols-2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); margin-bottom: 16px; }
-.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px; min-width: 0; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px; min-width: 0; margin-bottom: 16px; }
+.cols-2 > .card { margin-bottom: 0; }
 .card .hint { color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; }
 .chart { position: relative; height: 280px; }
 .chart.tall { height: 340px; }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
-.empty { color: var(--text-secondary); font-size: 13px; padding: 30px 0; text-align: center; }
-.section-title { margin: 22px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); }
-.airport-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
-.airport-sum .tile { padding: 10px 12px; }
-.airport-sum .val { font-size: 18px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
-.chip { font-size: 12px; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; background: var(--surface-2); }
-.chip b { font-variant-numeric: tabular-nums; }
-.st-ok::before { content: "✓ "; color: var(--good-text); font-weight: 700; }
-.st-bad::before { content: "! "; color: var(--warning-text); font-weight: 700; }
+.legend i, .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.empty { color: var(--text-secondary); font-size: 13px; padding: 30px 8px; text-align: center; }
+.metrics { list-style: none; margin: 0; padding: 0; }
+.metrics li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--grid); }
+.metrics li:last-child { border-bottom: 0; }
+.metrics .m-l { color: var(--text-secondary); font-size: 13px; }
+.metrics .m-l small { display: block; font-size: 11px; }
+.metrics .m-v { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .tbl-wrap { overflow: auto; max-height: 520px; border: 1px solid var(--border); border-radius: 10px; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
@@ -102,9 +102,10 @@ th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; c
 th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
 th .arr { color: var(--text-secondary); }
 tr:hover td { background: var(--surface-2); }
+tfoot td { position: sticky; bottom: 0; background: var(--surface-2); font-weight: 600; }
 .bar-cell { display: inline-block; height: 6px; border-radius: 3px; background: var(--series-1); vertical-align: middle; margin-left: 6px; }
 footer { color: var(--text-secondary); font-size: 12px; margin-top: 24px; }
-@media (max-width: 600px) { .tile .val { font-size: 20px; } .chart { height: 240px; } select { min-width: 120px; } }
+@media (max-width: 600px) { .tile .val { font-size: 20px; } .chart { height: 240px; } }
 </style>
 </head>
 <body>
@@ -112,115 +113,145 @@ footer { color: var(--text-secondary); font-size: 12px; margin-top: 24px; }
   <header class="top">
     <div>
       <h1>Seguimiento de la promo</h1>
-      <div class="sub" id="fileInfo">Mostrando datos de ejemplo</div>
+      <div class="sub" id="fileInfo">Sin datos cargados</div>
     </div>
     <div class="btns">
       <label class="btn primary" for="fileInput">⬆ Cargar Excel</label>
-      <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm,.csv" hidden>
-      <button id="btnTemplate" title="Descarga un Excel con la estructura esperada">⬇ Plantilla Excel</button>
-      <button id="btnReset" title="Vuelve a los datos de ejemplo">Restablecer</button>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm" hidden>
+      <button id="btnTemplate" title="Descarga un Excel vacío con la estructura esperada">⬇ Plantilla vacía</button>
+      <button id="btnClear" title="Borra los datos guardados en este navegador">Borrar datos</button>
       <button id="btnTheme" title="Cambiar tema">◐ Tema</button>
     </div>
   </header>
 
-  <div class="banner" id="banner">Estás viendo <b>datos de ejemplo</b>. Cargá tu Excel (hojas <i>Resumen</i>, <i>Sesiones</i>, <i>Por vuelo y destino</i>) con el botón o arrastrándolo abajo.</div>
-  <div class="drop" id="drop">Arrastrá el archivo Excel acá</div>
+  <div class="banner" id="banner"></div>
 
-  <div class="filters">
-    <label>Periodo (resumen)<select id="fPeriodo"></select></label>
-    <label>Aeropuerto<select id="fAirport"></select></label>
-    <label>Mes (vuelos)<select id="fMes"></select></label>
-    <label>País<select id="fPais"></select></label>
-  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+    <button class="tab" role="tab" data-tab="sesiones" aria-selected="false">Sesiones por día</button>
+    <button class="tab" role="tab" data-tab="vuelos" aria-selected="false">Vuelos y destinos</button>
+  </nav>
 
-  <div class="grid kpis" id="kpis"></div>
-
-  <div class="grid cols-2">
-    <div class="card">
-      <h2>Embudo de la promo</h2>
-      <div class="hint" id="funnelHint">Periodo seleccionado · % sobre el paso anterior</div>
-      <div class="chart" id="cFunnelBox"><canvas id="cFunnel"></canvas></div>
+  <!-- ===================== TAB RESUMEN ===================== -->
+  <section class="panel" id="tab-resumen" role="tabpanel">
+    <div class="periodo">
+      <div><span class="sub">Periodo informado</span><div class="big" id="perLabel">–</div></div>
+      <div><span class="sub">Inicio de la promo</span><div class="big" id="perStart">–</div></div>
+      <div><span class="sub">Días de promo</span><div class="big" id="perDays">–</div></div>
     </div>
-    <div class="card">
-      <h2>Evolución por periodo</h2>
-      <div class="hint">% interés y % conversión de la hoja Resumen</div>
-      <div class="legend"><span><i style="background:var(--series-1)"></i>% Interés</span><span><i style="background:var(--series-2)"></i>% Conversión</span></div>
-      <div class="chart" id="cTrendBox"><canvas id="cTrend"></canvas></div>
-    </div>
-  </div>
-
-  <div class="section-title">Sesiones por día y aeropuerto</div>
-  <div class="grid cols-2">
-    <div class="card">
-      <h2>Sesiones que recibieron la promo</h2>
-      <div class="hint">Por día</div>
-      <div class="legend" id="legDaily1"></div>
-      <div class="chart" id="cDailyBox"><canvas id="cDaily"></canvas></div>
-    </div>
-    <div class="card">
-      <h2>% Interés diario</h2>
-      <div class="hint">Sesiones interesadas / sesiones que recibieron la promo</div>
-      <div class="legend" id="legDaily2"></div>
-      <div class="chart" id="cDailyIntBox"><canvas id="cDailyInt"></canvas></div>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:16px">
-    <h2>Totales por aeropuerto</h2>
-    <div class="hint" id="airportHint">Acumulado del rango de fechas cargado</div>
-    <div class="airport-sum" id="airportSum"></div>
-  </div>
-
-  <div class="section-title">Por vuelo y destino</div>
-  <div class="grid cols-2">
-    <div class="card">
-      <h2>Top 10 destinos por sesiones interesadas</h2>
-      <div class="hint">Pasá el mouse para ver % interés y pasajeros</div>
-      <div class="chart tall" id="cDestBox"><canvas id="cDest"></canvas></div>
-    </div>
-    <div class="card">
-      <h2>% Interés por país</h2>
-      <div class="hint">Países con más sesiones que recibieron la promo (top 10)</div>
-      <div class="chart tall" id="cPaisBox"><canvas id="cPais"></canvas></div>
-    </div>
-  </div>
-
-  <div class="grid cols-2">
-    <div class="card">
-      <h2>Cobertura y alcance</h2>
-      <div class="hint">Sesiones / pasajeros = qué parte de los pasajeros del vuelo vio la promo</div>
-      <div class="chart" id="cCovBox"><canvas id="cCov"></canvas></div>
-    </div>
-    <div class="card">
-      <h2>Calidad del cruce de datos</h2>
-      <div class="hint">Vuelos según las columnas de control</div>
-      <div><b>Cobertura cruce</b></div><div class="chips" id="chipsCob"></div>
-      <div><b>Validación destino promo</b></div><div class="chips" id="chipsVal"></div>
-      <div class="hint" id="alertas"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="table-tools">
-      <div><h2>Detalle por vuelo</h2><div class="hint" id="tblCount" style="margin:0"></div></div>
-      <div class="btns">
-        <input type="search" id="tblSearch" placeholder="Buscar vuelo, destino, país…">
-        <button id="btnCsv">⬇ CSV</button>
+    <div class="grid kpis" id="kpis"></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Embudo de la promo</h2>
+        <div class="hint">Cantidad en cada paso y % sobre el paso anterior</div>
+        <div class="chart" id="cFunnelBox"><canvas></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Indicadores derivados</h2>
+        <div class="hint">Calculados a partir de la hoja Resumen</div>
+        <ul class="metrics" id="derived"></ul>
       </div>
     </div>
-    <div class="tbl-wrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
-  </div>
+    <div class="card">
+      <h2>Aporte por aeropuerto</h2>
+      <div class="hint" id="aportHint">Suma de la hoja Sesiones en todo el rango cargado</div>
+      <div class="grid kpis" id="aporte" style="margin:0"></div>
+    </div>
+  </section>
 
-  <footer>
-    Los datos se procesan solo en tu navegador: el archivo no se sube a ningún servidor. El último Excel cargado queda guardado en este navegador.
-  </footer>
+  <!-- ===================== TAB SESIONES ===================== -->
+  <section class="panel" id="tab-sesiones" role="tabpanel" hidden>
+    <div class="filters">
+      <label>Aeropuerto<select id="sAirport"></select></label>
+      <label>Desde<input type="date" id="sFrom"></label>
+      <label>Hasta<input type="date" id="sTo"></label>
+      <label>Ver por<span class="seg" id="sGroup"><button data-v="dia" aria-pressed="true">Día</button><button data-v="semana" aria-pressed="false">Semana de promo</button></span></label>
+    </div>
+    <div class="grid kpis" id="sKpis"></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Sesiones que recibieron la promo</h2>
+        <div class="hint" id="hRec">Por día</div>
+        <div class="legend lgAir"></div>
+        <div class="chart" id="cRecBox"><canvas></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Sesiones interesadas</h2>
+        <div class="hint" id="hInt">Por día</div>
+        <div class="legend lgAir"></div>
+        <div class="chart" id="cIntBox"><canvas></canvas></div>
+      </div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>% Interés</h2>
+        <div class="hint">Sesiones interesadas / sesiones que recibieron la promo</div>
+        <div class="legend lgAir"></div>
+        <div class="chart" id="cPctBox"><canvas></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Acumulado desde el inicio</h2>
+        <div class="hint">Sesiones interesadas acumuladas</div>
+        <div class="legend lgAir"></div>
+        <div class="chart" id="cCumBox"><canvas></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="table-tools"><div><h2>Detalle</h2><div class="hint" style="margin:0" id="sTblHint"></div></div><button id="btnCsvSes">⬇ CSV</button></div>
+      <div class="tbl-wrap"><table id="sTbl"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB VUELOS ===================== -->
+  <section class="panel" id="tab-vuelos" role="tabpanel" hidden>
+    <div class="filters">
+      <label>Mes<select id="vMes"></select></label>
+      <label>Aeropuerto de origen<select id="vOrigen"></select></label>
+      <label>País<select id="vPais"></select></label>
+      <label>Buscar<input type="search" id="vSearch" placeholder="Vuelo, destino, país…"></label>
+    </div>
+    <div class="grid kpis k6" id="vKpis"></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Top 10 destinos por sesiones interesadas</h2>
+        <div class="hint">Pasá el mouse para ver % interés y pasajeros</div>
+        <div class="chart tall" id="cDestBox"><canvas></canvas></div>
+      </div>
+      <div class="card">
+        <h2>% Interés por país</h2>
+        <div class="hint">Top 10 países por sesiones que recibieron la promo</div>
+        <div class="chart tall" id="cPaisBox"><canvas></canvas></div>
+      </div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Alcance: sesiones / pasajeros por destino</h2>
+        <div class="hint">Qué parte de los pasajeros recibió la promo (top 12)</div>
+        <div class="chart" id="cCovBox"><canvas></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Top 10 vuelos por % interés</h2>
+        <div class="hint">Solo vuelos con al menos <span id="minSes"></span> sesiones que recibieron la promo</div>
+        <div class="chart" id="cFlightBox"><canvas></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="table-tools"><div><h2>Detalle por vuelo</h2><div class="hint" style="margin:0" id="vTblHint"></div></div><button id="btnCsvVue">⬇ CSV</button></div>
+      <div class="tbl-wrap"><table id="vTbl"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <footer>Los datos se procesan solo en tu navegador: el archivo no se sube a ningún servidor. El último Excel cargado queda guardado en este navegador.</footer>
 </div>
 
 <script>
 /* =====================================================================
-   CONFIGURACIÓN — si cambian los nombres de hojas o columnas, editá acá.
-   Los textos se comparan sin tildes ni mayúsculas y por "contiene".
+   CONFIGURACIÓN — si cambian nombres de hojas/columnas o la fecha de
+   inicio, editá acá. Los textos se comparan sin tildes ni mayúsculas.
    ===================================================================== */
 const CONFIG = {
+  promoStart: new Date(2026, 9, 26),          // 26/10/2026 (mes base 0: 9 = octubre)
+  minSesionesRanking: 20,                     // mínimo de sesiones para el ranking de vuelos por % interés
   sheets: {
     resumen:  { names: ["resumen"], index: 0 },
     sesiones: { names: ["sesion"],  index: 1 },
@@ -240,10 +271,9 @@ const CONFIG = {
   sesionesSub: {
     recibidas:   h => h.includes("recibieron"),
     interesadas: h => h.includes("interesad"),
-    interes:     h => h.includes("interes") && !h.includes("interesad"),
   },
   vuelos: {
-    mes:         h => h === "mes" || h.startsWith("mes"),
+    mes:         h => h === "mes" || h.startsWith("mes "),
     vuelo:       h => h.includes("vuelo"),
     origen:      h => h.includes("origen"),
     recibidas:   h => h.includes("recibieron"),
@@ -253,64 +283,69 @@ const CONFIG = {
     pais:        h => h.includes("pais"),
     pasajeros:   h => h.includes("pasajeros") && !h.includes("sesiones"),
     ratio:       h => h.includes("sesiones") && h.includes("pasajeros"),
-    cobertura:   h => h.includes("cobertura"),
-    validacion:  h => h.includes("validacion"),
   },
-  // Valores de las columnas de control que se consideran "OK"
-  okValues: ["ok", "si", "sí", "valido", "validado", "true", "1", "correcto", "cruza", "con cruce", "match", "coincide"],
-  storageKey: "promoDashboard.v1",
+  storageKey: "promoDashboard.v2",
 };
 
 /* ============================ Utilidades ============================ */
 const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
 const norm = v => String(v ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const fmtInt = v => v == null || isNaN(v) ? "–" : Math.round(v).toLocaleString("es-AR");
 const fmtPct = (v, d = 1) => v == null || !isFinite(v) ? "–" : (v * 100).toLocaleString("es-AR", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
-const fmtMoney = v => v == null || isNaN(v) ? "–" : "$ " + v.toLocaleString("es-AR", { maximumFractionDigits: 0 });
-const fmtDec = (v, d = 2) => v == null || !isFinite(v) ? "–" : v.toLocaleString("es-AR", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmtMoney = (v, d = 2) => v == null || isNaN(v) ? "–" : "$ " + v.toLocaleString("es-AR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const sum = (arr, k) => arr.reduce((a, r) => a + (r[k] || 0), 0);
-const div = (a, b) => b ? a / b : null;
-const MONTHS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const div = (a, b) => (a != null && b) ? a / b : null;
+const MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const MES_LARGO = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MES_ALIAS = { ene:0, jan:0, feb:1, mar:2, abr:3, apr:3, may:4, jun:5, jul:6, ago:7, aug:7, sep:8, set:8, oct:9, nov:10, dic:11, dec:11 };
+const DAY = 864e5;
+const ddmm = d => String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0");
+const ddmmyyyy = d => ddmm(d) + "/" + d.getFullYear();
+const dayLabel = d => d.getDate() + " " + MES[d.getMonth()];
+const isoDate = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const titleCase = s => String(s).toLowerCase().replace(/(^|[\s\-\/(])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
 
 function toNum(v) {
   if (v == null || v === "") return null;
   if (typeof v === "number") return v;
-  let s = String(v).trim().replace(/[$\s]/g, "");
+  let s = String(v).trim().replace(/[$\s ]/g, "");
   const pct = s.endsWith("%"); if (pct) s = s.slice(0, -1);
   if (s.includes(",") && s.includes(".")) s = s.lastIndexOf(",") > s.lastIndexOf(".") ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
   else if (s.includes(",")) s = s.replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");   // 1.234 = mil doscientos...
   const n = parseFloat(s); if (isNaN(n)) return null;
   return pct ? n / 100 : n;
 }
-// Porcentajes: acepta 0,25 / 25 / "25%"
-function toPct(v) { const n = toNum(v); if (n == null) return null; return Math.abs(n) > 1.5 ? n / 100 : n; }
+const toPct = v => { const n = toNum(v); if (n == null) return null; return Math.abs(n) > 1.5 ? n / 100 : n; };
 function toDate(v) {
-  if (v instanceof Date) return v;
-  if (typeof v === "number" && v > 20000 && v < 80000) return new Date(Math.round((v - 25569) * 864e5) + new Date().getTimezoneOffset() * 6e4);
-  const s = String(v ?? "").trim(); let m;
-  if ((m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/))) return new Date(+(m[3].length === 2 ? "20" + m[3] : m[3]), m[2] - 1, +m[1]);
+  if (v instanceof Date) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+  if (typeof v === "number" && v > 20000 && v < 80000) { const d = new Date(Math.round((v - 25569) * DAY)); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); }
+  const s = norm(v); let m;
+  const yr = y => +(y.length === 2 ? "20" + y : y);
+  if ((m = s.match(/^(\d{1,2})[\/\-. ](\d{1,2})[\/\-. ](\d{2,4})$/))) return new Date(yr(m[3]), m[2] - 1, +m[1]);
   if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return new Date(+m[1], m[2] - 1, +m[3]);
+  if ((m = s.match(/^(\d{1,2})[\-\/ .]+([a-z]{3})[a-z]*\.?[\-\/ .]+(\d{2,4})$/)) && m[2] in MES_ALIAS) return new Date(yr(m[3]), MES_ALIAS[m[2]], +m[1]);
   return null;
 }
-const dayLabel = d => d.getDate() + " " + MONTHS[d.getMonth()];
-function monthLabel(v) {
-  const d = (v instanceof Date || typeof v === "number") ? toDate(v) : null;
-  if (d) return MONTHS[d.getMonth()] + " " + d.getFullYear();
-  return String(v ?? "").trim() || "Sin mes";
+function monthInfo(v) {
+  if (v instanceof Date || typeof v === "number") { const d = toDate(v); if (d) return { label: titleCase(MES_LARGO[d.getMonth()]) + " " + d.getFullYear(), order: d.getFullYear() * 12 + d.getMonth() }; }
+  const s = String(v ?? "").trim(); if (!s) return { label: "Sin mes", order: 1e9 };
+  const k = norm(s).slice(0, 3), y = (s.match(/\d{4}/) || [])[0];
+  return { label: titleCase(s), order: k in MES_ALIAS ? (y ? +y : CONFIG.promoStart.getFullYear() + (MES_ALIAS[k] < CONFIG.promoStart.getMonth() ? 1 : 0)) * 12 + MES_ALIAS[k] : 1e8 };
 }
-function periodLabel(v) { return (v instanceof Date || (typeof v === "number" && v > 20000)) ? monthLabel(v) : String(v ?? "").trim(); }
-const isOk = v => CONFIG.okValues.includes(norm(v));
 
 /* ============================ Lectura del Excel ============================ */
 function findSheet(wb, cfg) {
   const byName = wb.SheetNames.find(n => cfg.names.some(k => norm(n).includes(k)));
   return wb.Sheets[byName ?? wb.SheetNames[cfg.index]];
 }
-function rowsOf(ws) { return ws ? XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: false }) : []; }
+const rowsOf = ws => ws ? XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: false }) : [];
 function mapHeader(row, matchers) {
-  const idx = {}; const used = new Set();
+  const idx = {}, used = new Set();
   for (const [key, fn] of Object.entries(matchers)) {
-    const i = row.findIndex((h, j) => !used.has(j) && h != null && fn(norm(h)));
+    const i = (row || []).findIndex((h, j) => !used.has(j) && h != null && fn(norm(h)));
     if (i >= 0) { idx[key] = i; used.add(i); }
   }
   return idx;
@@ -319,49 +354,45 @@ function findHeaderRow(rows, test, max = 10) {
   for (let i = 0; i < Math.min(rows.length, max); i++) if ((rows[i] || []).some(c => test(norm(c)))) return i;
   return 0;
 }
+const filled = v => v != null && String(v).trim() !== "";
 
 function parseResumen(ws) {
-  const rows = rowsOf(ws); if (!rows.length) return [];
+  const rows = rowsOf(ws); if (!rows.length) return null;
   const hr = findHeaderRow(rows, h => h.includes("periodo"));
   const ix = mapHeader(rows[hr], CONFIG.resumen);
-  return rows.slice(hr + 1).filter(r => r[ix.periodo] != null && String(r[ix.periodo]).trim() !== "").map(r => {
-    const o = {
-      periodo: periodLabel(r[ix.periodo]),
-      recibidas: toNum(r[ix.recibidas]), interesadas: toNum(r[ix.interesadas]), interes: toPct(r[ix.interes]),
-      cupones: toNum(r[ix.cupones]), compras: toNum(r[ix.compras]), conversion: toPct(r[ix.conversion]),
-      atv: toNum(r[ix.atv]), nuevos: toNum(r[ix.nuevos]),
-    };
-    if (o.interes == null) o.interes = div(o.interesadas, o.recibidas);
-    if (o.conversion == null) o.conversion = div(o.compras, o.interesadas);
-    o.esTotal = norm(o.periodo).includes("total");
-    return o;
-  });
+  const r = rows.slice(hr + 1).find(r => filled(r[ix.periodo]) || filled(r[ix.recibidas]));
+  if (!r) return null;
+  const o = {
+    periodo: r[ix.periodo] instanceof Date ? ddmmyyyy(r[ix.periodo]) : String(r[ix.periodo] ?? "").trim(),
+    recibidas: toNum(r[ix.recibidas]), interesadas: toNum(r[ix.interesadas]), interes: toPct(r[ix.interes]),
+    cupones: toNum(r[ix.cupones]), compras: toNum(r[ix.compras]), conversion: toPct(r[ix.conversion]),
+    atv: toNum(r[ix.atv]), nuevos: toNum(r[ix.nuevos]),
+  };
+  if (o.interes == null) o.interes = div(o.interesadas, o.recibidas);
+  if (o.conversion == null) o.conversion = div(o.compras, o.cupones);
+  // Fecha de cierre del periodo: "26/10 al 17/11*" -> 17/11
+  const m = o.periodo.match(/al\s*(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/i);
+  if (m) { const y = m[3] ? +(m[3].length === 2 ? "20" + m[3] : m[3]) : CONFIG.promoStart.getFullYear() + (m[2] - 1 < CONFIG.promoStart.getMonth() ? 1 : 0); o.fin = new Date(y, m[2] - 1, +m[1]); }
+  return o;
 }
 
 function parseSesiones(ws) {
   const rows = rowsOf(ws); if (!rows.length) return { airports: [], days: [] };
-  const hr = findHeaderRow(rows, h => h === "fecha" || h.includes("recibieron"));
-  // Si la fila encontrada es la de sub-encabezados, la de aeropuertos es la anterior
-  let top = hr, sub = hr + 1;
-  if ((rows[hr] || []).some(c => norm(c).includes("recibieron"))) { top = Math.max(0, hr - 1); sub = hr; }
-  const topRow = rows[top] || [], subRow = rows[sub] || [];
+  let sub = findHeaderRow(rows, h => h.includes("recibieron"));
+  const top = Math.max(0, sub - 1), topRow = rows[top] || [], subRow = rows[sub] || [];
   let fechaCol = topRow.findIndex(c => norm(c) === "fecha"); if (fechaCol < 0) fechaCol = subRow.findIndex(c => norm(c) === "fecha"); if (fechaCol < 0) fechaCol = 0;
-  // Cada celda no vacía de la fila superior (excepto Fecha) = un aeropuerto; sus columnas siguen hasta el próximo aeropuerto
-  const starts = topRow.map((c, i) => (c != null && String(c).trim() !== "" && i !== fechaCol) ? i : -1).filter(i => i >= 0);
+  // Cada celda no vacía de la fila superior (menos "Fecha") es un aeropuerto; sus columnas llegan hasta el siguiente
+  const starts = topRow.map((c, i) => filled(c) && i !== fechaCol ? i : -1).filter(i => i >= 0);
   const groups = starts.map((s, k) => {
     const end = k + 1 < starts.length ? starts[k + 1] : Math.max(subRow.length, s + 3);
-    const slice = subRow.slice(s, end);
-    const m = mapHeader(slice, CONFIG.sesionesSub);
-    return { code: String(topRow[s]).trim(), rec: s + (m.recibidas ?? 0), int: s + (m.interesadas ?? 1), pct: m.interes != null ? s + m.interes : null };
+    const m = mapHeader(subRow.slice(s, end), CONFIG.sesionesSub);
+    return { code: String(topRow[s]).trim().toUpperCase(), rec: s + (m.recibidas ?? 0), int: s + (m.interesadas ?? 1) };
   });
   const days = [];
   for (const r of rows.slice(sub + 1)) {
-    const d = toDate(r[fechaCol]); if (!d || isNaN(d)) continue; // salta filas "Total" o vacías
+    const d = toDate(r[fechaCol]); if (!d || isNaN(d)) continue;   // salta "Total" y filas vacías
     const v = { fecha: d };
-    for (const g of groups) {
-      const rec = toNum(r[g.rec]), int = toNum(r[g.int]);
-      v[g.code] = { recibidas: rec, interesadas: int, interes: g.pct != null && r[g.pct] != null ? toPct(r[g.pct]) : div(int, rec) };
-    }
+    for (const g of groups) v[g.code] = { recibidas: toNum(r[g.rec]) || 0, interesadas: toNum(r[g.int]) || 0 };
     days.push(v);
   }
   days.sort((a, b) => a.fecha - b.fecha);
@@ -372,13 +403,13 @@ function parseVuelos(ws) {
   const rows = rowsOf(ws); if (!rows.length) return [];
   const hr = findHeaderRow(rows, h => h.includes("vuelo"));
   const ix = mapHeader(rows[hr], CONFIG.vuelos);
-  return rows.slice(hr + 1).filter(r => r.some(c => c != null && c !== "") && (r[ix.vuelo] != null || r[ix.destino] != null)).map(r => {
+  return rows.slice(hr + 1).filter(r => filled(r[ix.vuelo]) || filled(r[ix.destino])).map(r => {
+    const mi = monthInfo(r[ix.mes]);
     const o = {
-      mes: monthLabel(r[ix.mes]), vuelo: String(r[ix.vuelo] ?? "").trim(), origen: String(r[ix.origen] ?? "").trim(),
+      mes: mi.label, mesOrden: mi.order, vuelo: String(r[ix.vuelo] ?? "").trim(), origen: String(r[ix.origen] ?? "").trim().toUpperCase(),
       recibidas: toNum(r[ix.recibidas]) || 0, interesadas: toNum(r[ix.interesadas]) || 0, interes: toPct(r[ix.interes]),
-      destino: String(r[ix.destino] ?? "").trim() || "Sin destino", pais: String(r[ix.pais] ?? "").trim() || "Sin país",
+      destino: String(r[ix.destino] ?? "").trim().toUpperCase() || "Sin destino", pais: titleCase(String(r[ix.pais] ?? "").trim()) || "Sin país",
       pasajeros: toNum(r[ix.pasajeros]), ratio: toPct(r[ix.ratio]),
-      cobertura: r[ix.cobertura] ?? "", validacion: r[ix.validacion] ?? "",
     };
     if (o.interes == null) o.interes = div(o.interesadas, o.recibidas);
     if (o.ratio == null && o.pasajeros) o.ratio = o.recibidas / o.pasajeros;
@@ -386,116 +417,47 @@ function parseVuelos(ws) {
   });
 }
 
-function parseWorkbook(wb) {
-  return {
-    resumen: parseResumen(findSheet(wb, CONFIG.sheets.resumen)),
-    sesiones: parseSesiones(findSheet(wb, CONFIG.sheets.sesiones)),
-    vuelos: parseVuelos(findSheet(wb, CONFIG.sheets.vuelos)),
-  };
-}
+const parseWorkbook = wb => ({
+  resumen: parseResumen(findSheet(wb, CONFIG.sheets.resumen)),
+  sesiones: parseSesiones(findSheet(wb, CONFIG.sheets.sesiones)),
+  vuelos: parseVuelos(findSheet(wb, CONFIG.sheets.vuelos)),
+});
 
-/* ============================ Datos de ejemplo ============================ */
-function demoWorkbook() {
-  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+function templateWorkbook() {
   const wb = XLSX.utils.book_new();
-  // Hoja 1
-  const res = [["Periodo","Sesiones que recibieron la promo","Sesiones interesadas (códigos enviados)","Interes","Cupones usados","Compras","Conversión","ATV","Nuevos miembros"]];
-  [["Septiembre 2026", 38200], ["Octubre 2026", 45100], ["Noviembre 2026", 51800]].forEach(([p, s], i) => {
-    const int = Math.round(s * (0.17 + i * 0.015)), cup = Math.round(int * (0.31 + i * 0.02)), comp = Math.round(cup * 0.82);
-    res.push([p, s, int, int / s, cup, comp, comp / int, 42000 + i * 2500, Math.round(int * 0.22)]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(res), "Resumen");
-  // Hoja 2
-  const ses = [["Fecha","AEP",null,null,"EZE",null,null],
-    [null,"Sesiones que recibieron la promo","Sesiones interesadas","Interés","Sesiones que recibieron la promo","Sesiones interesadas","Interés"]];
-  for (let d = 1; d <= 25; d++) {
-    const date = new Date(2026, 10, d), wk = [0, 6].includes(date.getDay()) ? 1.25 : 1;
-    const a = Math.round((700 + rnd() * 260) * wk), e = Math.round((980 + rnd() * 320) * wk);
-    const ai = Math.round(a * (0.15 + rnd() * 0.06)), ei = Math.round(e * (0.18 + rnd() * 0.07));
-    ses.push([date, a, ai, ai / a, e, ei, ei / e]);
-  }
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ses, { cellDates: true }), "Sesiones");
-  // Hoja 3
-  const dests = [["MIA","Estados Unidos"],["MAD","España"],["GRU","Brasil"],["SCL","Chile"],["JFK","Estados Unidos"],["FCO","Italia"],["PUJ","República Dominicana"],["CUN","México"],["GIG","Brasil"],["MVD","Uruguay"],["BCN","España"],["LIM","Perú"],["FLN","Brasil"],["ASU","Paraguay"]];
-  const vue = [["Mes","Número de vuelo","Aeropuerto de origen","Sesiones que recibieron la promo","Sesiones interesadas","% interés","Destino (ARPT1)","País","Pasajeros totales","Sesiones / pasajeros","Cobertura cruce","Validación destino promo"]];
-  ["Octubre 2026", "Noviembre 2026"].forEach(mes => dests.forEach(([d, p], i) => {
-    const orig = ["GRU","FLN","MVD","ASU","SCL","LIM"].includes(d) && i % 2 ? "AEP" : "EZE";
-    const pax = Math.round(150 + rnd() * 250) * 26, s = Math.round(pax * (0.35 + rnd() * 0.3)), it = Math.round(s * (0.12 + rnd() * 0.14));
-    vue.push([mes, "AR" + (1100 + i * 13), orig, s, it, it / s, d, p, pax, s / pax, rnd() > 0.12 ? "OK" : "Sin cruce", rnd() > 0.08 ? "OK" : "Revisar"]);
-  }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(vue), "Por vuelo y destino");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Periodo","Sesiones que recibieron la promo","Sesiones interesadas (códigos enviados)","Interes","Cupones usados","Compras","Conversión","ATV","Nuevos miembros"]]), "Resumen");
+  const ses = XLSX.utils.aoa_to_sheet([["Fecha","AEP",null,null,"EZE",null,null],
+    [null,"Sesiones que recibieron la promo","Sesiones interesadas","Interés","Sesiones que recibieron la promo","Sesiones interesadas","Interés"]]);
+  ses["!merges"] = [{ s: { r: 0, c: 1 }, e: { r: 0, c: 3 } }, { s: { r: 0, c: 4 }, e: { r: 0, c: 6 } }];
+  XLSX.utils.book_append_sheet(wb, ses, "Sesiones");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Mes","Número de vuelo","Aeropuerto de origen","Sesiones que recibieron la promo","Sesiones interesadas","% interés","Destino (ARPT1)","País","Pasajeros totales","Sesiones / pasajeros","Cobertura cruce","Validación destino promo"]]), "Por vuelo y destino");
   return wb;
 }
 
 /* ============================ Estado ============================ */
-let DATA = null, META = { demo: true, name: "", at: "" };
+const EMPTY = { resumen: null, sesiones: { airports: [], days: [] }, vuelos: [] };
+let DATA = EMPTY, META = { name: "", at: "" };
+let activeTab = "resumen", sesGroup = "dia";
+let vSort = { k: "interesadas", d: -1 };
 const charts = {};
-let sortKey = "interesadas", sortDir = -1;
-
-function saveState() {
-  try { localStorage.setItem(CONFIG.storageKey, JSON.stringify({ meta: META, data: DATA })); } catch (e) {}
-}
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
 function loadState() {
   try {
-    const s = JSON.parse(localStorage.getItem(CONFIG.storageKey) || "null");
-    if (!s || !s.data) return false;
+    const s = JSON.parse(store.get(CONFIG.storageKey) || "null"); if (!s) return;
     s.data.sesiones.days.forEach(d => d.fecha = new Date(d.fecha));
-    DATA = s.data; META = s.meta; return true;
-  } catch (e) { return false; }
+    if (s.data.resumen?.fin) s.data.resumen.fin = new Date(s.data.resumen.fin);
+    DATA = s.data; META = s.meta;
+  } catch (e) {}
 }
+const hasData = () => !!(DATA.resumen || DATA.sesiones.days.length || DATA.vuelos.length);
 
-function setData(data, meta) {
-  DATA = data; META = meta;
-  if (!meta.demo) saveState();
-  buildFilters(); renderAll();
-}
-
-/* ============================ Filtros ============================ */
-function fillSelect(sel, options, keep) {
-  const prev = keep ? sel.value : null;
-  sel.innerHTML = options.map(([v, t]) => `<option value="${escapeHtml(v)}">${escapeHtml(t)}</option>`).join("");
-  if (prev && options.some(o => o[0] === prev)) sel.value = prev;
-}
-function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-function buildFilters() {
-  const per = DATA.resumen.filter(r => !r.esTotal);
-  const opts = per.map((r, i) => ["p" + i, r.periodo]);
-  if (per.length > 1) opts.push(["all", "Acumulado (todos)"]);
-  DATA.resumen.forEach((r, i) => { if (r.esTotal) opts.push(["t" + i, r.periodo]); });
-  fillSelect($("#fPeriodo"), opts);
-  if (per.length) $("#fPeriodo").value = "p" + (per.length - 1);
-
-  const airports = new Set([...DATA.sesiones.airports, ...DATA.vuelos.map(v => v.origen).filter(Boolean)]);
-  fillSelect($("#fAirport"), [["", "Todos"], ...[...airports].map(a => [a, a])]);
-  const meses = [...new Set(DATA.vuelos.map(v => v.mes))];
-  fillSelect($("#fMes"), [["", "Todos"], ...meses.map(m => [m, m])]);
-  if (meses.length) $("#fMes").value = meses[meses.length - 1];
-  const paises = [...new Set(DATA.vuelos.map(v => v.pais))].sort((a, b) => a.localeCompare(b, "es"));
-  fillSelect($("#fPais"), [["", "Todos"], ...paises.map(p => [p, p])]);
-}
-function selectedResumen() {
-  const v = $("#fPeriodo").value, per = DATA.resumen.filter(r => !r.esTotal);
-  if (!v) return { cur: null, prev: null };
-  if (v === "all") {
-    const t = { periodo: "Acumulado" };
-    ["recibidas", "interesadas", "cupones", "compras", "nuevos"].forEach(k => t[k] = sum(per, k));
-    t.interes = div(t.interesadas, t.recibidas); t.conversion = div(t.compras, t.interesadas);
-    t.atv = div(per.reduce((a, r) => a + (r.atv || 0) * (r.compras || 0), 0), t.compras);
-    return { cur: t, prev: null };
-  }
-  if (v[0] === "t") return { cur: DATA.resumen[+v.slice(1)], prev: null };
-  const i = +v.slice(1); return { cur: per[i], prev: per[i - 1] || null };
-}
-function filteredVuelos() {
-  const a = $("#fAirport").value, m = $("#fMes").value, p = $("#fPais").value, q = norm($("#tblSearch").value);
-  return DATA.vuelos.filter(v => (!a || v.origen === a) && (!m || v.mes === m) && (!p || v.pais === p) &&
-    (!q || norm([v.vuelo, v.destino, v.pais, v.origen].join(" ")).includes(q)));
-}
-
-/* ============================ Render ============================ */
+/* ============================ Charts helpers ============================ */
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const seriesColor = i => css("--series-" + ((i % 4) + 1));
-
+const airColor = code => css("--series-" + ((Math.max(0, DATA.sesiones.airports.indexOf(code)) % 4) + 1));
 function chartDefaults() {
   Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
   Chart.defaults.font.size = 12;
@@ -507,123 +469,175 @@ function chartDefaults() {
     borderColor: css("--border"), borderWidth: 1, padding: 10, boxPadding: 4, usePointStyle: true,
   });
   Chart.defaults.maintainAspectRatio = false;
-  Chart.defaults.animation.duration = 300;
+  Chart.defaults.animation.duration = 250;
 }
 function draw(id, cfg) {
   if (charts[id]) charts[id].destroy();
   const box = $("#" + id + "Box");
-  let canvas = box.querySelector("canvas");
-  if (!canvas) { box.innerHTML = `<canvas id="${id}"></canvas>`; canvas = box.querySelector("canvas"); }
-  charts[id] = new Chart(canvas, cfg);
+  if (!box.querySelector("canvas")) box.innerHTML = "<canvas></canvas>";
+  charts[id] = new Chart(box.querySelector("canvas"), cfg);
 }
 function emptyChart(id, msg) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
   $("#" + id + "Box").innerHTML = `<div class="empty">${msg}</div>`;
 }
 const barStyle = { borderRadius: 4, borderSkipped: "start", maxBarThickness: 28, borderWidth: 0 };
-const lineStyle = c => ({ borderColor: c, backgroundColor: c, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 12, tension: 0.25 });
-const pctAxis = { ticks: { callback: v => fmtPct(v, 0) }, beginAtZero: true, grid: { color: css("--grid") } };
-const intAxis = { ticks: { callback: v => fmtInt(v) }, beginAtZero: true, grid: { color: css("--grid") } };
-
-function renderKpis() {
-  const { cur, prev } = selectedResumen();
-  const defs = [
-    ["Sesiones que recibieron la promo", "recibidas", fmtInt],
-    ["Sesiones interesadas", "interesadas", fmtInt],
-    ["% Interés", "interes", fmtPct, true],
-    ["Cupones usados", "cupones", fmtInt],
-    ["Compras", "compras", fmtInt],
-    ["% Conversión", "conversion", fmtPct, true],
-    ["ATV", "atv", fmtMoney],
-    ["Nuevos miembros", "nuevos", fmtInt],
-  ];
-  $("#kpis").innerHTML = !cur ? `<div class="tile empty">La hoja Resumen no tiene datos</div>` : defs.map(([l, k, f, isPct]) => {
-    let d = "";
-    if (prev && cur[k] != null && prev[k] != null) {
-      const diff = isPct ? (cur[k] - prev[k]) * 100 : div(cur[k] - prev[k], prev[k]) * 100;
-      if (diff != null && isFinite(diff)) {
-        const cls = diff > 0.05 ? "up" : diff < -0.05 ? "down" : "";
-        d = `<div class="delta ${cls}">${diff > 0 ? "▲" : diff < 0 ? "▼" : "•"} ${Math.abs(diff).toLocaleString("es-AR", { maximumFractionDigits: 1 })}${isPct ? " pp" : "%"} vs ${escapeHtml(prev.periodo)}</div>`;
-      }
-    } else d = `<div class="delta">${escapeHtml(cur.periodo)}</div>`;
-    return `<div class="tile"><div class="lbl">${l}</div><div class="val">${f(cur[k])}</div>${d}</div>`;
-  }).join("");
-}
-
-function renderFunnel() {
-  const { cur } = selectedResumen();
-  if (!cur) return emptyChart("cFunnel", "Sin datos de resumen");
-  const steps = [["Recibieron la promo", cur.recibidas], ["Interesadas", cur.interesadas], ["Cupones usados", cur.cupones], ["Compras", cur.compras]];
-  const cols = ["--funnel-1", "--funnel-2", "--funnel-3", "--funnel-4"].map(css);
-  $("#funnelHint").textContent = `${cur.periodo} · % sobre el paso anterior`;
-  draw("cFunnel", {
-    type: "bar",
-    data: { labels: steps.map(s => s[0]), datasets: [{ data: steps.map(s => s[1]), backgroundColor: cols, ...barStyle, maxBarThickness: 40 }] },
-    options: {
-      indexAxis: "y",
-      scales: { x: intAxis, y: { grid: { display: false } } },
-      plugins: { tooltip: { callbacks: {
-        label: c => ` ${fmtInt(c.raw)}` + (c.dataIndex ? ` · ${fmtPct(div(c.raw, steps[c.dataIndex - 1][1]))} del paso anterior` : ""),
-        afterLabel: c => c.dataIndex ? ` ${fmtPct(div(c.raw, steps[0][1]), 2)} del total` : "",
-      } } },
-    },
-    plugins: [valueLabels((v, i) => fmtInt(v) + (i ? "  (" + fmtPct(div(v, steps[i - 1][1]), 0) + ")" : ""))],
-  });
-}
-// Etiqueta directa al final de cada barra horizontal
+const lineStyle = c => ({ borderColor: c, backgroundColor: c, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 12, tension: 0.2 });
+const pctAxis = () => ({ ticks: { callback: v => fmtPct(v, 0) }, beginAtZero: true, grid: { color: css("--grid") } });
+const intAxis = () => ({ ticks: { callback: v => fmtInt(v) }, beginAtZero: true, grid: { color: css("--grid") } });
 function valueLabels(fmt) {
   return { id: "vl", afterDatasetsDraw(chart) {
-    const { ctx } = chart; const meta = chart.getDatasetMeta(0);
-    ctx.save(); ctx.font = "12px " + Chart.defaults.font.family; ctx.fillStyle = css("--text-primary"); ctx.textBaseline = "middle";
+    const { ctx } = chart, meta = chart.getDatasetMeta(0);
+    ctx.save(); ctx.font = "12px " + Chart.defaults.font.family; ctx.textBaseline = "middle";
     meta.data.forEach((bar, i) => {
       const v = chart.data.datasets[0].data[i]; if (v == null) return;
-      const t = fmt(v, i), w = ctx.measureText(t).width;
-      const x = bar.x + 6 + w > chart.chartArea.right ? bar.x - w - 6 : bar.x + 6;
-      ctx.fillStyle = bar.x + 6 + w > chart.chartArea.right ? "#fff" : css("--text-primary");
-      ctx.fillText(t, x, bar.y);
+      const t = fmt(v, i), w = ctx.measureText(t).width, inside = bar.x + 6 + w > chart.chartArea.right;
+      ctx.fillStyle = inside ? "#fff" : css("--text-primary");
+      ctx.fillText(t, inside ? bar.x - w - 6 : bar.x + 6, bar.y);
     });
     ctx.restore();
   } };
 }
+const NO_DATA = "Cargá el Excel para ver este gráfico";
 
-function renderTrend() {
-  const per = DATA.resumen.filter(r => !r.esTotal);
-  if (per.length < 2) return emptyChart("cTrend", "Se necesitan al menos 2 periodos en la hoja Resumen para ver la evolución");
-  draw("cTrend", {
-    type: "line",
-    data: { labels: per.map(r => r.periodo), datasets: [
-      { label: "% Interés", data: per.map(r => r.interes), ...lineStyle(seriesColor(0)), pointRadius: 4 },
-      { label: "% Conversión", data: per.map(r => r.conversion), ...lineStyle(seriesColor(1)), pointRadius: 4 },
-    ] },
-    options: { interaction: { mode: "index", intersect: false }, scales: { y: pctAxis, x: { grid: { display: false } } },
-      plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtPct(c.raw)}` } } } },
-  });
-}
+/* ============================ TAB RESUMEN ============================ */
+function renderResumen() {
+  const r = DATA.resumen, days = DATA.sesiones.days;
+  const start = CONFIG.promoStart;
+  const end = r?.fin || (days.length ? days[days.length - 1].fecha : null);
+  $("#perLabel").textContent = r?.periodo || "–";
+  $("#perStart").textContent = ddmmyyyy(start);
+  $("#perDays").textContent = end ? Math.round((end - start) / DAY) + 1 : "–";
 
-function renderDaily() {
-  const { airports, days } = DATA.sesiones; const a = $("#fAirport").value;
-  const shown = airports.filter(x => !a || x === a);
-  const legend = shown.map(x => `<span><i style="background:${seriesColor(airports.indexOf(x))}"></i>${escapeHtml(x)}</span>`).join("");
-  $("#legDaily1").innerHTML = $("#legDaily2").innerHTML = legend;
-  if (!days.length) { emptyChart("cDaily", "La hoja Sesiones no tiene filas con fecha"); emptyChart("cDailyInt", "Sin datos"); }
+  const defs = [
+    ["Sesiones que recibieron la promo", "recibidas", fmtInt],
+    ["Sesiones interesadas (códigos enviados)", "interesadas", fmtInt],
+    ["% Interés", "interes", fmtPct, "interesadas / recibieron"],
+    ["Cupones usados", "cupones", fmtInt],
+    ["Compras", "compras", fmtInt],
+    ["% Conversión", "conversion", fmtPct, "compras / cupones usados"],
+    ["ATV", "atv", fmtMoney, "ticket promedio"],
+    ["Nuevos miembros", "nuevos", fmtInt],
+  ];
+  $("#kpis").innerHTML = defs.map(([l, k, f, n]) =>
+    `<div class="tile"><div class="lbl">${l}</div><div class="val">${r ? f(r[k]) : "–"}</div>${n ? `<div class="note">${n}</div>` : ""}</div>`).join("");
+
+  if (!r) emptyChart("cFunnel", NO_DATA);
   else {
-    const labels = days.map(d => dayLabel(d.fecha));
-    const ds = (k, fmt) => shown.map(x => ({ label: x, data: days.map(d => d[x]?.[k] ?? null), ...lineStyle(seriesColor(airports.indexOf(x))) }));
-    const opts = (axis, f) => ({ interaction: { mode: "index", intersect: false }, scales: { y: axis, x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 12 } } },
-      plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${f(c.raw)}` } } } });
-    draw("cDaily", { type: "line", data: { labels, datasets: ds("recibidas") }, options: opts(intAxis, fmtInt) });
-    draw("cDailyInt", { type: "line", data: { labels, datasets: ds("interes") }, options: opts(pctAxis, fmtPct) });
+    const steps = [["Recibieron la promo", r.recibidas], ["Interesadas", r.interesadas], ["Cupones usados", r.cupones], ["Compras", r.compras]];
+    draw("cFunnel", {
+      type: "bar",
+      data: { labels: steps.map(s => s[0]), datasets: [{ data: steps.map(s => s[1]), backgroundColor: ["--funnel-1", "--funnel-2", "--funnel-3", "--funnel-4"].map(css), ...barStyle, maxBarThickness: 40 }] },
+      options: { indexAxis: "y", scales: { x: intAxis(), y: { grid: { display: false } } },
+        plugins: { tooltip: { callbacks: {
+          label: c => ` ${fmtInt(c.raw)}` + (c.dataIndex ? ` · ${fmtPct(div(c.raw, steps[c.dataIndex - 1][1]))} del paso anterior` : ""),
+          afterLabel: c => c.dataIndex ? ` ${fmtPct(div(c.raw, steps[0][1]), 2)} de las sesiones con promo` : "",
+        } } } },
+      plugins: [valueLabels((v, i) => fmtInt(v) + (i ? "  (" + fmtPct(div(v, steps[i - 1][1]), 1) + ")" : ""))],
+    });
   }
-  // Totales por aeropuerto
-  if (days.length) $("#airportHint").textContent = `Acumulado del ${dayLabel(days[0].fecha)} al ${dayLabel(days[days.length - 1].fecha)} ${days[days.length - 1].fecha.getFullYear()}`;
-  $("#airportSum").innerHTML = shown.map(x => {
-    const rec = days.reduce((s, d) => s + (d[x]?.recibidas || 0), 0), int = days.reduce((s, d) => s + (d[x]?.interesadas || 0), 0);
-    return `<div class="tile"><div class="lbl"><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${seriesColor(airports.indexOf(x))};margin-right:5px"></i>${escapeHtml(x)} · recibieron</div><div class="val">${fmtInt(rec)}</div></div>
-      <div class="tile"><div class="lbl">${escapeHtml(x)} · interesadas</div><div class="val">${fmtInt(int)}</div></div>
-      <div class="tile"><div class="lbl">${escapeHtml(x)} · % interés</div><div class="val">${fmtPct(div(int, rec))}</div></div>`;
-  }).join("");
+
+  const nDays = end ? Math.round((end - start) / DAY) + 1 : null;
+  const d = r ? [
+    ["Uso de cupones", "cupones usados / sesiones interesadas", fmtPct(div(r.cupones, r.interesadas))],
+    ["Compras sobre sesiones con promo", "compras / recibieron la promo", fmtPct(div(r.compras, r.recibidas), 2)],
+    ["Compras sobre interesadas", "compras / sesiones interesadas", fmtPct(div(r.compras, r.interesadas))],
+    ["Ventas estimadas", "compras × ATV", fmtMoney(r.compras != null && r.atv != null ? r.compras * r.atv : null)],
+    ["Nuevos miembros por compra", "nuevos miembros / compras", fmtPct(div(r.nuevos, r.compras))],
+    ["Promedio diario", "sesiones con promo / día · interesadas / día", nDays ? fmtInt(r.recibidas / nDays) + " · " + fmtInt(r.interesadas / nDays) : "–"],
+  ] : [];
+  $("#derived").innerHTML = d.length ? d.map(([l, s, v]) => `<li><span class="m-l">${l}<small>${s}</small></span><span class="m-v">${v}</span></li>`).join("") : `<li class="empty">${NO_DATA.replace("este gráfico", "los indicadores")}</li>`;
+
+  const { airports } = DATA.sesiones;
+  if (!days.length) { $("#aporte").innerHTML = `<div class="empty" style="grid-column:1/-1">Cargá el Excel para ver el aporte por aeropuerto</div>`; return; }
+  $("#aportHint").textContent = `Suma de la hoja Sesiones, del ${ddmm(days[0].fecha)} al ${ddmm(days[days.length - 1].fecha)}`;
+  const tot = airports.map(a => ({ a, rec: days.reduce((s, d) => s + d[a].recibidas, 0), int: days.reduce((s, d) => s + d[a].interesadas, 0) }));
+  const R = sum(tot, "rec"), I = sum(tot, "int");
+  $("#aporte").innerHTML = tot.map(t => `
+    <div class="tile"><div class="lbl"><span class="sw" style="background:${airColor(t.a)}"></span>${esc(t.a)} · recibieron la promo</div><div class="val">${fmtInt(t.rec)}</div><div class="note">${fmtPct(div(t.rec, R))} del total</div></div>
+    <div class="tile"><div class="lbl"><span class="sw" style="background:${airColor(t.a)}"></span>${esc(t.a)} · interesadas</div><div class="val">${fmtInt(t.int)}</div><div class="note">${fmtPct(div(t.int, I))} del total · interés ${fmtPct(div(t.int, t.rec))}</div></div>`).join("");
 }
 
+/* ============================ TAB SESIONES ============================ */
+function sesFiltered() {
+  const from = $("#sFrom").value ? new Date($("#sFrom").value + "T00:00") : null, to = $("#sTo").value ? new Date($("#sTo").value + "T00:00") : null;
+  return DATA.sesiones.days.filter(d => (!from || d.fecha >= from) && (!to || d.fecha <= to));
+}
+function sesBuckets(days, airports) {
+  if (sesGroup === "dia") return days.map(d => ({ label: dayLabel(d.fecha), full: ddmmyyyy(d.fecha), vals: d }));
+  const m = new Map();
+  days.forEach(d => {
+    const w = Math.floor((d.fecha - CONFIG.promoStart) / DAY / 7) + 1;
+    if (!m.has(w)) { const s = new Date(CONFIG.promoStart.getTime() + (w - 1) * 7 * DAY), e = new Date(s.getTime() + 6 * DAY);
+      m.set(w, { label: "Sem " + w, full: `Semana ${w} (${ddmm(s)} al ${ddmm(e)})`, vals: Object.fromEntries(airports.map(a => [a, { recibidas: 0, interesadas: 0 }])), n: 0 }); }
+    const b = m.get(w); b.n++;
+    airports.forEach(a => { b.vals[a].recibidas += d[a].recibidas; b.vals[a].interesadas += d[a].interesadas; });
+  });
+  return [...m.entries()].sort((a, b) => a[0] - b[0]).map(([, b]) => ({ ...b, full: b.full + (b.n < 7 ? ` · ${b.n} día(s)` : "") }));
+}
+function renderSesiones() {
+  const all = DATA.sesiones.airports, sel = $("#sAirport").value;
+  const airports = all.filter(a => !sel || a === sel);
+  const days = sesFiltered();
+  const legend = airports.map(a => `<span><i style="background:${airColor(a)}"></i>${esc(a)}</span>`).join("");
+  $$(".lgAir").forEach(el => el.innerHTML = airports.length > 1 ? legend : "");
+  const per = sesGroup === "dia" ? "Por día" : "Por semana de promo (semana 1 = 26/10 a 01/11)";
+  $("#hRec").textContent = $("#hInt").textContent = per;
+
+  // KPIs del rango
+  const R = airports.reduce((s, a) => s + days.reduce((t, d) => t + d[a].recibidas, 0), 0);
+  const I = airports.reduce((s, a) => s + days.reduce((t, d) => t + d[a].interesadas, 0), 0);
+  const tiles = [
+    ["Sesiones que recibieron la promo", fmtInt(days.length ? R : null)],
+    ["Sesiones interesadas", fmtInt(days.length ? I : null)],
+    ["% Interés", fmtPct(div(I, R))],
+    ["Promedio diario de interesadas", days.length ? fmtInt(I / days.length) : "–", days.length ? `${days.length} día(s) con datos` : ""],
+  ];
+  $("#sKpis").innerHTML = tiles.map(([l, v, n]) => `<div class="tile"><div class="lbl">${l}</div><div class="val">${v}</div>${n ? `<div class="note">${n}</div>` : ""}</div>`).join("");
+
+  if (!days.length) {
+    const msg = DATA.sesiones.days.length ? "No hay días en el rango elegido" : NO_DATA;
+    ["cRec", "cInt", "cPct", "cCum"].forEach(id => emptyChart(id, msg));
+  } else {
+    const b = sesBuckets(days, all), labels = b.map(x => x.label);
+    const lineOpts = (axis, f) => ({ interaction: { mode: "index", intersect: false },
+      scales: { y: axis, x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 12 } } },
+      plugins: { tooltip: { callbacks: { title: c => b[c[0].dataIndex].full, label: c => ` ${c.dataset.label}: ${f(c.raw)}` } } } });
+    const ds = fn => airports.map(a => ({ label: a, data: b.map(x => fn(x.vals[a])), ...lineStyle(airColor(a)), pointRadius: sesGroup === "dia" ? 0 : 4 }));
+    const type = sesGroup === "dia" ? "line" : "bar";
+    const series = fn => type === "line" ? ds(fn) : airports.map(a => ({ label: a, data: b.map(x => fn(x.vals[a])), backgroundColor: airColor(a), ...barStyle }));
+    const barOpts = (f) => { const o = lineOpts(intAxis(), f); return o; };
+    draw("cRec", { type, data: { labels, datasets: series(v => v.recibidas) }, options: type === "line" ? lineOpts(intAxis(), fmtInt) : barOpts(fmtInt) });
+    draw("cInt", { type, data: { labels, datasets: series(v => v.interesadas) }, options: type === "line" ? lineOpts(intAxis(), fmtInt) : barOpts(fmtInt) });
+    draw("cPct", { type: "line", data: { labels, datasets: ds(v => div(v.interesadas, v.recibidas)) }, options: lineOpts(pctAxis(), fmtPct) });
+    // Acumulado (siempre diario, desde el primer día del rango)
+    const dl = days.map(d => ({ label: dayLabel(d.fecha), full: ddmmyyyy(d.fecha) }));
+    draw("cCum", { type: "line", data: { labels: dl.map(x => x.label), datasets: airports.map(a => {
+        let acc = 0; return { label: a, data: days.map(d => (acc += d[a].interesadas)), ...lineStyle(airColor(a)) }; }) },
+      options: { interaction: { mode: "index", intersect: false }, scales: { y: intAxis(), x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 12 } } },
+        plugins: { tooltip: { callbacks: { title: c => dl[c[0].dataIndex].full, label: c => ` ${c.dataset.label}: ${fmtInt(c.raw)}` } } } } });
+  }
+
+  // Tabla
+  const b = days.length ? sesBuckets(days, all) : [];
+  const head = `<tr><th>${sesGroup === "dia" ? "Fecha" : "Semana"}</th>` + airports.map(a => `<th class="num">${esc(a)} · recibieron</th><th class="num">${esc(a)} · interesadas</th><th class="num">${esc(a)} · % interés</th>`).join("") +
+    (airports.length > 1 ? `<th class="num">Total recibieron</th><th class="num">Total interesadas</th><th class="num">Total % interés</th>` : "") + "</tr>";
+  const cells = vals => { let tr = 0, ti = 0; const h = airports.map(a => { const v = vals[a]; tr += v.recibidas; ti += v.interesadas;
+      return `<td class="num">${fmtInt(v.recibidas)}</td><td class="num">${fmtInt(v.interesadas)}</td><td class="num">${fmtPct(div(v.interesadas, v.recibidas))}</td>`; }).join("");
+    return h + (airports.length > 1 ? `<td class="num">${fmtInt(tr)}</td><td class="num">${fmtInt(ti)}</td><td class="num">${fmtPct(div(ti, tr))}</td>` : ""); };
+  $("#sTbl thead").innerHTML = head;
+  $("#sTbl tbody").innerHTML = b.map(x => `<tr><td>${esc(x.full)}</td>${cells(x.vals)}</tr>`).join("") || `<tr><td colspan="99" class="empty">${DATA.sesiones.days.length ? "No hay días en el rango elegido" : "Cargá el Excel para ver el detalle"}</td></tr>`;
+  const totVals = Object.fromEntries(airports.map(a => [a, { recibidas: days.reduce((s, d) => s + d[a].recibidas, 0), interesadas: days.reduce((s, d) => s + d[a].interesadas, 0) }]));
+  $("#sTbl tfoot").innerHTML = b.length ? `<tr><td>Total</td>${cells(totVals)}</tr>` : "";
+  $("#sTblHint").textContent = b.length ? `${b.length} fila(s)` : "";
+}
+
+/* ============================ TAB VUELOS ============================ */
+function vueFiltered() {
+  const m = $("#vMes").value, o = $("#vOrigen").value, p = $("#vPais").value, q = norm($("#vSearch").value);
+  return DATA.vuelos.filter(v => (!m || v.mes === m) && (!o || v.origen === o) && (!p || v.pais === p) &&
+    (!q || norm([v.vuelo, v.destino, v.pais, v.origen].join(" ")).includes(q)));
+}
 function groupBy(rows, key) {
   const m = new Map();
   rows.forEach(r => {
@@ -633,125 +647,167 @@ function groupBy(rows, key) {
   });
   return [...m.values()].map(g => ({ ...g, interes: div(g.interesadas, g.recibidas), ratio: div(g.recibidas, g.pasajeros) }));
 }
+const VCOLS = [
+  ["mes", "Mes"], ["vuelo", "Vuelo"], ["origen", "Origen"], ["destino", "Destino"], ["pais", "País"],
+  ["recibidas", "Recibieron la promo", fmtInt], ["interesadas", "Interesadas", fmtInt], ["interes", "% interés", fmtPct],
+  ["pasajeros", "Pasajeros totales", fmtInt], ["ratio", "Sesiones / pasajeros", fmtPct],
+];
+function renderVuelos() {
+  const rows = vueFiltered();
+  const R = sum(rows, "recibidas"), I = sum(rows, "interesadas"), P = sum(rows, "pasajeros");
+  const tiles = [
+    ["Vuelos", rows.length ? fmtInt(new Set(rows.map(r => r.vuelo + "|" + r.mes)).size) : "–"],
+    ["Destinos", rows.length ? fmtInt(new Set(rows.map(r => r.destino)).size) : "–"],
+    ["Recibieron la promo", rows.length ? fmtInt(R) : "–"],
+    ["Interesadas", rows.length ? fmtInt(I) : "–"],
+    ["% Interés", fmtPct(div(I, R))],
+    ["Sesiones / pasajeros", fmtPct(div(R, P))],
+  ];
+  $("#vKpis").innerHTML = tiles.map(([l, v]) => `<div class="tile"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join("");
 
-function renderVuelosCharts() {
-  const rows = filteredVuelos();
-  if (!rows.length) { ["cDest", "cPais", "cCov"].forEach(id => emptyChart(id, "Sin vuelos para los filtros elegidos")); }
-  else {
+  if (!rows.length) {
+    const msg = DATA.vuelos.length ? "Sin vuelos para los filtros elegidos" : NO_DATA;
+    ["cDest", "cPais", "cCov", "cFlight"].forEach(id => emptyChart(id, msg));
+  } else {
+    const tip = g => [` Interesadas: ${fmtInt(g.interesadas)}`, ` Recibieron la promo: ${fmtInt(g.recibidas)}`, ` % interés: ${fmtPct(g.interes)}`, ` Pasajeros: ${fmtInt(g.pasajeros)}`, ` Vuelos: ${g.vuelos}`];
+    const hbar = (id, list, val, fmt, color, tipFn) => draw(id, { type: "bar",
+      data: { labels: list.map(g => g.name), datasets: [{ data: list.map(val), backgroundColor: color, ...barStyle }] },
+      options: { indexAxis: "y", scales: { x: fmt === fmtInt ? intAxis() : pctAxis(), y: { grid: { display: false } } },
+        plugins: { tooltip: { callbacks: { label: c => tipFn(list[c.dataIndex]) } } } },
+      plugins: [valueLabels(v => fmt(v))] });
+
     const dest = groupBy(rows, "destino").sort((a, b) => b.interesadas - a.interesadas).slice(0, 10);
-    const tip = g => [` Sesiones interesadas: ${fmtInt(g.interesadas)}`, ` Recibieron la promo: ${fmtInt(g.recibidas)}`, ` % interés: ${fmtPct(g.interes)}`, ` Pasajeros: ${fmtInt(g.pasajeros)}`, ` Vuelos: ${g.vuelos}`];
-    draw("cDest", { type: "bar",
-      data: { labels: dest.map(g => g.name), datasets: [{ data: dest.map(g => g.interesadas), backgroundColor: seriesColor(0), ...barStyle }] },
-      options: { indexAxis: "y", scales: { x: intAxis, y: { grid: { display: false } } }, plugins: { tooltip: { callbacks: { label: c => tip(dest[c.dataIndex]) } } } },
-      plugins: [valueLabels(v => fmtInt(v))] });
-
+    hbar("cDest", dest, g => g.interesadas, fmtInt, css("--series-1"), tip);
     const pais = groupBy(rows, "pais").sort((a, b) => b.recibidas - a.recibidas).slice(0, 10).sort((a, b) => b.interes - a.interes);
-    draw("cPais", { type: "bar",
-      data: { labels: pais.map(g => g.name), datasets: [{ data: pais.map(g => g.interes), backgroundColor: seriesColor(0), ...barStyle }] },
-      options: { indexAxis: "y", scales: { x: pctAxis, y: { grid: { display: false } } }, plugins: { tooltip: { callbacks: { label: c => tip(pais[c.dataIndex]) } } } },
-      plugins: [valueLabels(v => fmtPct(v))] });
+    hbar("cPais", pais, g => g.interes, fmtPct, css("--series-1"), tip);
 
-    const cov = groupBy(rows, "destino").filter(g => g.ratio != null).sort((a, b) => b.ratio - a.ratio).slice(0, 12);
+    const cov = groupBy(rows, "destino").filter(g => g.ratio != null && g.pasajeros).sort((a, b) => b.ratio - a.ratio).slice(0, 12);
     if (!cov.length) emptyChart("cCov", "Sin datos de pasajeros");
     else draw("cCov", { type: "bar",
-      data: { labels: cov.map(g => g.name), datasets: [{ data: cov.map(g => g.ratio), backgroundColor: seriesColor(2), ...barStyle }] },
-      options: { scales: { y: { ...pctAxis, ticks: { callback: v => fmtPct(v, 0) } }, x: { grid: { display: false } } },
+      data: { labels: cov.map(g => g.name), datasets: [{ data: cov.map(g => g.ratio), backgroundColor: css("--series-3"), ...barStyle }] },
+      options: { scales: { y: { ...pctAxis(), ticks: { callback: v => fmtPct(v, 1) } }, x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0 } } },
         plugins: { tooltip: { callbacks: { label: c => [` Sesiones / pasajeros: ${fmtPct(c.raw)}`, ` Pasajeros: ${fmtInt(cov[c.dataIndex].pasajeros)}`, ` Recibieron la promo: ${fmtInt(cov[c.dataIndex].recibidas)}`] } } } } });
+
+    $("#minSes").textContent = CONFIG.minSesionesRanking;
+    const fl = groupBy(rows.map(r => ({ ...r, key: r.vuelo + " " + r.origen + "→" + r.destino })), "key")
+      .filter(g => g.recibidas >= CONFIG.minSesionesRanking).sort((a, b) => b.interes - a.interes).slice(0, 10);
+    if (!fl.length) emptyChart("cFlight", `Ningún vuelo llega a ${CONFIG.minSesionesRanking} sesiones con los filtros elegidos`);
+    else hbar("cFlight", fl, g => g.interes, fmtPct, css("--series-1"), tip);
   }
-  // Calidad
-  const chips = (k) => {
-    const m = new Map(); rows.forEach(r => { const v = String(r[k] ?? "").trim() || "(vacío)"; m.set(v, (m.get(v) || 0) + 1); });
-    return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([v, n]) => `<span class="chip ${isOk(v) ? "st-ok" : "st-bad"}">${escapeHtml(v)}: <b>${n}</b> (${fmtPct(n / rows.length, 0)})</span>`).join("") || `<span class="chip">Sin datos</span>`;
-  };
-  $("#chipsCob").innerHTML = chips("cobertura");
-  $("#chipsVal").innerHTML = chips("validacion");
-  const bad = rows.filter(r => !isOk(r.validacion) || !isOk(r.cobertura));
-  $("#alertas").innerHTML = bad.length ? `<span class="st-bad"></span>${bad.length} vuelo(s) con algún control distinto de OK: ${bad.slice(0, 8).map(r => escapeHtml(r.vuelo + " → " + r.destino)).join(", ")}${bad.length > 8 ? "…" : ""}`
-    : `<span class="st-ok"></span>Todos los vuelos filtrados pasan los controles`;
-}
 
-const COLS = [
-  ["mes", "Mes"], ["vuelo", "Vuelo"], ["origen", "Origen"], ["destino", "Destino"], ["pais", "País"],
-  ["recibidas", "Recibieron promo", fmtInt], ["interesadas", "Interesadas", fmtInt], ["interes", "% interés", fmtPct],
-  ["pasajeros", "Pasajeros", fmtInt], ["ratio", "Sesiones / pax", fmtPct], ["cobertura", "Cobertura cruce"], ["validacion", "Validación destino"],
-];
-function renderTable() {
-  const rows = filteredVuelos().slice().sort((a, b) => {
-    const x = a[sortKey], y = b[sortKey];
-    if (typeof x === "number" || typeof y === "number") return ((x ?? -Infinity) - (y ?? -Infinity)) * sortDir;
-    return String(x).localeCompare(String(y), "es", { numeric: true }) * sortDir;
+  // Tabla
+  const sorted = rows.slice().sort((a, b) => {
+    const k = vSort.k === "mes" ? "mesOrden" : vSort.k, x = a[k], y = b[k];
+    if (typeof x === "number" || typeof y === "number") return ((x ?? -Infinity) - (y ?? -Infinity)) * vSort.d;
+    return String(x).localeCompare(String(y), "es", { numeric: true }) * vSort.d;
   });
-  const maxInt = Math.max(0, ...rows.map(r => r.interes || 0));
-  $("#tbl thead").innerHTML = "<tr>" + COLS.map(([k, l, f]) => `<th data-k="${k}" class="${f ? "num" : ""}">${l} <span class="arr">${sortKey === k ? (sortDir > 0 ? "▲" : "▼") : ""}</span></th>`).join("") + "</tr>";
-  $("#tbl tbody").innerHTML = rows.map(r => "<tr>" + COLS.map(([k, , f]) => {
-    if (k === "interes") return `<td class="num">${fmtPct(r[k])}<span class="bar-cell" style="width:${maxInt ? Math.round((r[k] || 0) / maxInt * 40) : 0}px"></span></td>`;
-    if (k === "cobertura" || k === "validacion") return `<td><span class="${isOk(r[k]) ? "st-ok" : "st-bad"}">${escapeHtml(r[k] || "(vacío)")}</span></td>`;
-    return `<td class="${f ? "num" : ""}">${f ? f(r[k]) : escapeHtml(r[k])}</td>`;
-  }).join("") + "</tr>").join("") || `<tr><td colspan="${COLS.length}" class="empty">Sin vuelos para los filtros elegidos</td></tr>`;
-  const tot = { rec: sum(rows, "recibidas"), int: sum(rows, "interesadas") };
-  $("#tblCount").textContent = `${rows.length} vuelos · ${fmtInt(tot.rec)} sesiones · ${fmtInt(tot.int)} interesadas · ${fmtPct(div(tot.int, tot.rec))} interés`;
-  $("#tbl thead").querySelectorAll("th").forEach(th => th.onclick = () => {
-    const k = th.dataset.k; if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = COLS.find(c => c[0] === k)[2] ? -1 : 1; }
-    renderTable();
+  const maxInt = Math.max(0, ...sorted.map(r => r.interes || 0));
+  $("#vTbl thead").innerHTML = "<tr>" + VCOLS.map(([k, l, f]) => `<th data-k="${k}" class="${f ? "num" : ""}">${l} <span class="arr">${vSort.k === k ? (vSort.d > 0 ? "▲" : "▼") : ""}</span></th>`).join("") + "</tr>";
+  $("#vTbl tbody").innerHTML = sorted.map(r => "<tr>" + VCOLS.map(([k, , f]) => k === "interes"
+      ? `<td class="num">${fmtPct(r[k])}<span class="bar-cell" style="width:${maxInt ? Math.round((r[k] || 0) / maxInt * 40) : 0}px"></span></td>`
+      : `<td class="${f ? "num" : ""}">${f ? f(r[k]) : esc(r[k])}</td>`).join("") + "</tr>").join("")
+    || `<tr><td colspan="${VCOLS.length}" class="empty">${DATA.vuelos.length ? "Sin vuelos para los filtros elegidos" : "Cargá el Excel para ver el detalle"}</td></tr>`;
+  $("#vTblHint").textContent = rows.length ? `${rows.length} fila(s) · click en un encabezado para ordenar` : "";
+  $$("#vTbl th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k; if (vSort.k === k) vSort.d *= -1; else vSort = { k, d: VCOLS.find(c => c[0] === k)[2] ? -1 : 1 };
+    renderVuelos();
   });
 }
 
-function renderAll() {
+/* ============================ Filtros, tabs y render ============================ */
+function fillSelect(sel, opts, keep = true) {
+  const prev = sel.value;
+  sel.innerHTML = opts.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join("");
+  if (keep && opts.some(o => o[0] === prev)) sel.value = prev;
+}
+function buildFilters() {
+  const { airports, days } = DATA.sesiones;
+  fillSelect($("#sAirport"), [["", "Todos"], ...airports.map(a => [a, a])]);
+  const mn = days.length ? isoDate(days[0].fecha) : "", mx = days.length ? isoDate(days[days.length - 1].fecha) : "";
+  ["#sFrom", "#sTo"].forEach(s => { $(s).min = mn; $(s).max = mx; });
+  $("#sFrom").value = mn; $("#sTo").value = mx;
+
+  const meses = [...new Map(DATA.vuelos.map(v => [v.mes, v.mesOrden])).entries()].sort((a, b) => a[1] - b[1]).map(e => e[0]);
+  fillSelect($("#vMes"), [["", "Todos"], ...meses.map(m => [m, m])]);
+  const orig = [...new Set(DATA.vuelos.map(v => v.origen).filter(Boolean))].sort();
+  fillSelect($("#vOrigen"), [["", "Todos"], ...orig.map(a => [a, a])]);
+  const paises = [...new Set(DATA.vuelos.map(v => v.pais))].sort((a, b) => a.localeCompare(b, "es"));
+  fillSelect($("#vPais"), [["", "Todos"], ...paises.map(p => [p, p])]);
+}
+function renderActive() {
   chartDefaults();
-  renderKpis(); renderFunnel(); renderTrend(); renderDaily(); renderVuelosCharts(); renderTable();
-  $("#banner").className = META.demo ? "banner" : "banner ok";
-  $("#banner").innerHTML = META.demo
-    ? `Estás viendo <b>datos de ejemplo</b>. Cargá tu Excel (hojas <i>Resumen</i>, <i>Sesiones</i>, <i>Por vuelo y destino</i>) con el botón o arrastrándolo abajo.`
-    : `Datos reales: <b>${escapeHtml(META.name)}</b> · ${DATA.resumen.length} periodo(s), ${DATA.sesiones.days.length} día(s), ${DATA.vuelos.length} fila(s) de vuelos.`;
-  $("#fileInfo").textContent = META.demo ? "Mostrando datos de ejemplo" : `Archivo: ${META.name} · cargado ${META.at}`;
+  ({ resumen: renderResumen, sesiones: renderSesiones, vuelos: renderVuelos })[activeTab]();
 }
+function renderAll() {
+  const ok = hasData();
+  $("#banner").hidden = ok;
+  $("#banner").innerHTML = `Todavía no cargaste datos. Usá <b>Cargar Excel</b> (o arrastrá el archivo a la página). El Excel tiene que tener las hojas <i>Resumen</i>, <i>Sesiones</i> y <i>Por vuelo y destino</i>; si querés, bajá la <b>plantilla vacía</b> como referencia.`;
+  $("#fileInfo").textContent = ok ? `Archivo: ${META.name} · cargado ${META.at}` : "Sin datos cargados · promo desde " + ddmmyyyy(CONFIG.promoStart);
+  renderActive();
+}
+function setTab(t) {
+  activeTab = t; store.set(CONFIG.storageKey + ".tab", t);
+  $$(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  $$(".panel").forEach(p => p.hidden = p.id !== "tab-" + t);
+  renderActive();
+}
+$$(".tab").forEach(b => b.onclick = () => setTab(b.dataset.tab));
 
-/* ============================ Eventos ============================ */
+/* ============================ Carga de archivo ============================ */
 function readFile(file) {
   const fr = new FileReader();
   fr.onload = e => {
     try {
       const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array", cellDates: true });
       const data = parseWorkbook(wb);
-      if (!data.resumen.length && !data.sesiones.days.length && !data.vuelos.length) throw new Error("No se encontraron datos en las hojas esperadas.");
-      setData(data, { demo: false, name: file.name, at: new Date().toLocaleString("es-AR") });
+      DATA = data; META = { name: file.name, at: new Date().toLocaleString("es-AR") };
+      if (!hasData()) { DATA = EMPTY; throw new Error("no se encontraron filas con datos en las hojas esperadas."); }
+      store.set(CONFIG.storageKey, JSON.stringify({ meta: META, data: DATA }));
+      buildFilters(); renderAll();
     } catch (err) { alert("No se pudo leer el archivo: " + err.message + "\n\nRevisá que tenga las 3 hojas con los encabezados de la plantilla."); }
   };
   fr.readAsArrayBuffer(file);
 }
 $("#fileInput").onchange = e => { if (e.target.files[0]) readFile(e.target.files[0]); e.target.value = ""; };
-const drop = $("#drop");
-["dragenter", "dragover"].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
-["dragleave", "drop"].forEach(t => document.addEventListener(t, e => { e.preventDefault(); if (t === "drop" || e.target === drop) drop.classList.remove("over"); }));
-document.addEventListener("drop", e => { const f = e.dataTransfer?.files?.[0]; if (f) readFile(f); });
-$("#btnTemplate").onclick = () => XLSX.writeFile(demoWorkbook(), "plantilla_promo.xlsx", { cellDates: true });
-$("#btnReset").onclick = () => { try { localStorage.removeItem(CONFIG.storageKey); } catch (e) {} setData(parseWorkbook(demoWorkbook()), { demo: true }); };
+let dragDepth = 0;
+document.addEventListener("dragenter", e => { e.preventDefault(); dragDepth++; document.body.classList.add("drop-over"); });
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("drop-over"); } });
+document.addEventListener("drop", e => { e.preventDefault(); dragDepth = 0; document.body.classList.remove("drop-over"); const f = e.dataTransfer?.files?.[0]; if (f) readFile(f); });
+$("#btnTemplate").onclick = () => XLSX.writeFile(templateWorkbook(), "plantilla_promo.xlsx");
+$("#btnClear").onclick = () => { if (!confirm("¿Borrar los datos cargados en este navegador?")) return; store.del(CONFIG.storageKey); DATA = EMPTY; META = {}; buildFilters(); renderAll(); };
 $("#btnTheme").onclick = () => {
-  const root = document.documentElement, dark = matchMedia("(prefers-color-scheme: dark)").matches;
-  const cur = root.dataset.theme || (dark ? "dark" : "light");
-  root.dataset.theme = cur === "dark" ? "light" : "dark";
-  try { localStorage.setItem(CONFIG.storageKey + ".theme", root.dataset.theme); } catch (e) {}
-  renderAll();
+  const root = document.documentElement, cur = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  root.dataset.theme = cur === "dark" ? "light" : "dark"; store.set(CONFIG.storageKey + ".theme", root.dataset.theme);
+  renderActive();
 };
-["#fPeriodo"].forEach(s => $(s).onchange = () => { renderKpis(); renderFunnel(); });
-$("#fAirport").onchange = () => { renderDaily(); renderVuelosCharts(); renderTable(); };
-["#fMes", "#fPais"].forEach(s => $(s).onchange = () => { renderVuelosCharts(); renderTable(); });
-$("#tblSearch").oninput = () => { renderVuelosCharts(); renderTable(); };
-$("#btnCsv").onclick = () => {
-  const rows = filteredVuelos();
-  const csv = [COLS.map(c => c[1]).join(";"), ...rows.map(r => COLS.map(([k]) => {
-    const v = r[k]; return typeof v === "number" ? String(v).replace(".", ",") : `"${String(v ?? "").replace(/"/g, '""')}"`;
-  }).join(";"))].join("\n");
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = "detalle_vuelos.csv"; a.click();
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", renderActive);
+["#sAirport", "#sFrom", "#sTo"].forEach(s => $(s).onchange = renderSesiones);
+$$("#sGroup button").forEach(b => b.onclick = () => { sesGroup = b.dataset.v; $$("#sGroup button").forEach(x => x.setAttribute("aria-pressed", x === b)); renderSesiones(); });
+["#vMes", "#vOrigen", "#vPais"].forEach(s => $(s).onchange = renderVuelos);
+$("#vSearch").oninput = renderVuelos;
+
+function downloadCsv(name, header, rows) {
+  const cell = v => typeof v === "number" ? String(v).replace(".", ",") : `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = [header.join(";"), ...rows.map(r => r.map(cell).join(";"))].join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = name; a.click();
+}
+$("#btnCsvVue").onclick = () => downloadCsv("detalle_vuelos.csv", VCOLS.map(c => c[1]), vueFiltered().map(r => VCOLS.map(([k]) => r[k])));
+$("#btnCsvSes").onclick = () => {
+  const airports = DATA.sesiones.airports.filter(a => !$("#sAirport").value || a === $("#sAirport").value);
+  const b = sesBuckets(sesFiltered(), DATA.sesiones.airports);
+  downloadCsv("sesiones.csv", [sesGroup === "dia" ? "Fecha" : "Semana", ...airports.flatMap(a => [a + " recibieron", a + " interesadas", a + " % interés"])],
+    b.map(x => [x.full, ...airports.flatMap(a => [x.vals[a].recibidas, x.vals[a].interesadas, div(x.vals[a].interesadas, x.vals[a].recibidas)])]));
 };
-matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => renderAll());
 
 /* ============================ Inicio ============================ */
-try { const t = localStorage.getItem(CONFIG.storageKey + ".theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+const t0 = store.get(CONFIG.storageKey + ".theme"); if (t0) document.documentElement.dataset.theme = t0;
 if (typeof XLSX === "undefined" || typeof Chart === "undefined") {
-  document.querySelector(".wrap").insertAdjacentHTML("afterbegin", `<div class="banner">No se pudieron cargar las librerías (SheetJS / Chart.js) desde cdnjs.cloudflare.com. Verificá la conexión o que la red permita ese dominio.</div>`);
-} else if (loadState()) { buildFilters(); renderAll(); }
-else setData(parseWorkbook(demoWorkbook()), { demo: true });
+  $("#banner").innerHTML = "No se pudieron cargar las librerías (SheetJS / Chart.js) desde cdnjs.cloudflare.com. Verificá la conexión o que la red permita ese dominio.";
+} else {
+  loadState(); buildFilters(); renderAll();
+  const tab = store.get(CONFIG.storageKey + ".tab"); if (tab && $("#tab-" + tab)) setTab(tab);
+}
 </script>
 </body>
 </html>
